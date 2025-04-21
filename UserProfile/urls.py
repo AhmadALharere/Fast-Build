@@ -1,10 +1,11 @@
 
 from django.urls import path , include
-from . import views
+from . import apis
+
 
 
 urlpatterns = [
-#    path('signup',views.signup,name ='sign-up'),
+    path('google/',apis.GoogleLogin.as_view(),name ='google-login'),
 #    path('profile/',views.showProfile,name ='profile'),
 #    path('profile/Edit',views.EditProfile,name ='Edit_profile'),
 ]

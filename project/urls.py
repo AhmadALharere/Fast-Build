@@ -21,11 +21,16 @@ from django.conf.urls.static import static
 urlpatterns = [
     
     
-    #path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     #path('accounts/', include('UserProfile.urls')),
     path('admin/', admin.site.urls),
     path('api-auth/',include('rest_framework.urls')),
+    path('api/auth/', include('dj_rest_auth.urls')),               # login, logout, password change/reset
+    path('api/auth/', include('allauth.socialaccount.urls')),      
+    path('api/auth/', include('UserProfile.urls')),      
+    
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # register, email confirm
+    
     #path('PcParts/',include('PcPart.urls')),
     
 ]

@@ -43,16 +43,37 @@ INSTALLED_APPS = [
     'contactUs',
     
     'rest_framework',
+    'rest_framework.authtoken',
+    
+    'dj_rest_auth',
     
     "django.contrib.sites",
     'allauth',  
     'allauth.account',
 	'allauth.socialaccount',
+ 
+ 
+ 
     'allauth.socialaccount.providers.google',
-    
+ 
+ 
+    'dj_rest_auth.registration',   
 ]
 
 SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
 # Specify the context processors as follows:
 TEMPLATES = [
@@ -115,6 +136,9 @@ WSGI_APPLICATION = 'project.wsgi.application'
 #    }
 #}
 
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
 DATABASES = {
     "default": {
