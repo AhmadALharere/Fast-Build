@@ -12,15 +12,13 @@ def imgprofileSave(instance,filename):
 
 class profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
-    BMBC_coins = models.IntegerField()
+    birth_date = models.DateField(auto_now=False, auto_now_add=False)
     total_paied = models.IntegerField(default=0)
-    
-    #city
     phone_number = models.CharField(default='',max_length=15)
-    image = models.ImageField(upload_to=imgprofileSave)
-    #LikedParts
+    gender = models.CharField(default="Male",choices={("Male","Male"),("Female","Female")}, max_length=10)
+    image = models.ImageField(upload_to=imgprofileSave,null=True,blank=True)
+    username_editing = models.SmallIntegerField(default=1)
     
-        
     def __str__(self):
         return self.user.username
     
@@ -31,7 +29,7 @@ class profile(models.Model):
 @receiver(post_save, sender=User)
 def _post_save_receiver(sender,instance,created, **kwargs):
     if created:
-        profile.objects.create(user=instance,BMBC_coins=0)
+        profile.objects.create(user=instance,birth_date="2000-01-01",total_paied=0,phone_number=0,gender="Male",username_editing=1)
  
 
 
