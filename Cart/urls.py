@@ -5,6 +5,6 @@ from . import api
 urlpatterns = [
     
     
-    path('Chick-Cart',api.IsCollectionValidAPIView,name="chick compitability"),
+    path('Chick-Cart',api.is_collection_valid,name="chick compitability"),
     
 ]

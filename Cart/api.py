@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 
 def compitability_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
@@ -160,17 +162,17 @@ def compitability_CPU_Cooling(CPU):#Warning if it false
     
 def compitability_CPU_Memory(CPU,Memorys):#Danger if it false
         return CPU.max_memory_support>=Memorys.__len__()
-    
-class IsCollectionValidAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt  # هنا يكون فعال لأنك خارج ال APIView class
+def is_collection_valid(request):
         part_sorter={
         'Case':[],
         'CaseAccessory':[],
         'CaseFan':[],
-        'CPU':[],
+        'Cpu':[],
         'CPUCooler':[],
         'MotherBoart':[],
         'ExternalHardDrive':[],
@@ -195,7 +197,7 @@ class IsCollectionValidAPIView(APIView):
 
             data = request.data
             # data = json.load(request.body)
-
+            print(data)
             for partID,num in data:
                 unit = Part.objects.select_subclasses().get(pk=partID)
                 unit_type=type(unit).__name__
@@ -203,24 +205,27 @@ class IsCollectionValidAPIView(APIView):
                 while num>0:
                     part_sorter[unit_type].append(unit)
                     num-=1
+                    
         except Exception as Ex:
-                print(f'Exciption:{Ex}/nAPI: Is_collection_Valid/nunit: {unit}/ndata:{data}')
+                if Ex.__str__()=="not enough values to unpack (expected 2, got 1)":
+                    return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':f'this cart is not represent a BC collection'})    
+                print(f'Exciption:{Ex}/nAPI: Is_collection_Valid/ndata:{data}')
                 return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':'Exception has been detecated'})
         for keys in ['Case',
-                    'CPU',
+                    'Cpu',
                     'CPUCooler',
                     'MotherBoart',
                     'PowerSupply']:
-            if part_sorter[keys].__len__ != 1:
-                return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':f'this cart is not represent a PC collection because there is {part_sorter[keys].__len__} {keys}s in it,if you want to build a PC then pick one of {keys} kategory'})
+            if len(part_sorter[keys])!= 1:
+                return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':f'this cart is not represent a PC collection because there is {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick just one of {keys} kategory'})
             
         for keys in ['CaseFan',
                     'InternalHardDrive',
                     'Memory'
                     ]:
 
-            if part_sorter[keys].__len__ < 1:
-                return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':f'this cart is not represent a PC collection because there is NO {part_sorter[keys].__len__} {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
+            if len(part_sorter[keys]) < 1:
+                return JsonResponse({'build_status':'Field','cart_status ':'Undefined','massege':f'this cart is not represent a PC collection because there is NO {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
 
         if not compitability_MotherBoard_CPU(part_sorter['MotherBoard'],part_sorter['CPU']):
             return JsonResponse({'build_status':'Success','cart_status ':'Danger','massege':'the MotherBoard and CPU isnot compitable'})
