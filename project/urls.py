@@ -30,8 +30,8 @@ urlpatterns = [
     path('api/auth/', include('UserProfile.urls')),      
     
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # register, email confirm
-    
-    #path('PcParts/',include('PcPart.urls')),
+    path('api/Cart/',include('Cart.urls')),
+    path('PcParts/',include('PcPart.urls')),
     
 ]
 

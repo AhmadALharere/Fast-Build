@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ShopBascet,order,Descount,Offer
+from .models import ShopBascet,order,Descount
 # Register your models here.
 
 

@@ -9,9 +9,14 @@ state_list = (
     ("Done","Done"),
     ("Canceled","Canceled"),
     ("Rejected","Rejected")
-    
-)
+    )
 
+compitability_list = (
+    ("safe","safe"),
+    ("warning","warning"),
+    ("Danger","Danger"),
+    ("Undefined","Undefined")
+    )
 
 
 class ShopBascet(models.Model):
@@ -20,7 +25,8 @@ class ShopBascet(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now=True)
     total_cost = models.IntegerField(default=0)
-    
+    state = models.CharField(default="Waiting",choices=state_list,max_length=10)
+    compitability = models.CharField(default="Undefined",max_length=10,choices=compitability_list) 
 
     def __str__(self):
         return f"bascet {self.id} on date: {self.order_date}"
@@ -30,8 +36,7 @@ class order(models.Model):
     
     bascet = models.ForeignKey("ShopBascet", on_delete=models.CASCADE)
     product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
-    state = models.CharField(default="Waiting",choices=state_list,max_length=50)
-
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
         return self.product
@@ -53,25 +58,4 @@ class Descount(models.Model):
 
     def __str__(self):
         return f"descount on {self.part}"    
-    
-
-
-class Offer(models.Model):
-    
-    id = models.AutoField(primary_key=True)
-    title = models.CharField(default="new offer", max_length=100)
-    description = models.TextField()
-    units = models.ManyToManyField("offer_unit")
-    start_date = models.DateField(auto_now=False, auto_now_add=False)
-    end_date = models.DateField(auto_now=False, auto_now_add=False)
-    
-    
-    
-class offer_unit(models.Model):
-    
-    product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
-    product_count = models.PositiveIntegerField(default=1)
-
-    def __str__(self):
-        return self.product
     

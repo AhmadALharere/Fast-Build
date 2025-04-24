@@ -1164,6 +1164,7 @@ def reset_dataBase(request):
     resaults+=f"reinitialization motherboard socket : {init_motherBoardSocket(request).content.decode('utf-8')}    , "
     resaults+=f"reinitialization form factors : {init_form_factor(request).content.decode('utf-8')}    , "
     resaults+=f"reinitialization r.size : {init_radiator_siz(request).content.decode('utf-8')}    , "
+    return JsonResponse(resaults,safe=False)
     
     resaults+=f"load Case : {load_Cases(request).content.decode('utf-8')}    , "
     resaults+=f"load CaseAccessorys : {load_Case_accessorys(request).content.decode('utf-8')}    , "

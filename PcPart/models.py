@@ -1,8 +1,13 @@
 from django.db import models
-
+from model_utils.managers import InheritanceManager
 # Create your models here.
 #app name: PcPart
 #----------------------------------------------------------------------------------------------------
+
+def imageSaver(instance,filename):
+    name,extention = filename.split('.')
+    return "profile/imgicon/%s.%s"%(instance.id,extention)
+
 
 
 
@@ -372,9 +377,13 @@ class Part(models.Model):
     name = models.CharField(default="", max_length=200)
     price = models.FloatField()
     population = models.IntegerField(default=0)#increase in every order by one
+    liked = models.IntegerField(default=0)
     in_storage = models.IntegerField(default=0)
+    #Rate = models.DecimalField(max_digits=3, decimal_places=2)
     #image
-    #image_filename = models.ImageField(_upload_to=None, height_field=None, width_field=None, max_length=None)
+    image_filename = models.ImageField(upload_to=imageSaver)
+    
+    objects = InheritanceManager()
 
     def increase_storage(self,amount):
         self.in_storage += amount
@@ -383,6 +392,7 @@ class Part(models.Model):
 
 class Case(Part):
     #general
+#    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     type = models.CharField(default="ATX Mid Tower" , choices=case_types , max_length=100)
     color = models.CharField(default="Black", max_length=50)
     side_panel = models.CharField(default="normal", max_length=50)
@@ -417,6 +427,7 @@ class Case(Part):
 class CaseAccessory(Part):
     
     #general
+#    category = models.CharField(default="Case Accessory",choices=(("Case Accessory","Case Accessory")), max_length=10)
     type = models.CharField(default="", max_length=80)
     features = models.TextField(default="")
     #case
@@ -433,7 +444,7 @@ class CaseAccessory(Part):
 #----------------------------------------------------------------------------------------------------
 
 class CaseFan(Part):
-    
+#    category = models.CharField(default="Case Fan",choices=(("Case Fan","Case Fan")), max_length=10)
     size = models.IntegerField(choices=Fan_Size)
     color = models.CharField(default="No Color", max_length=50,null=True,blank=True)
     fan_type = models.CharField(default="Standard" , choices=Fan_Type , max_length=50)# Standard , Static Pressure , High Airflow , Silent , RGB/ARGB , Slim , Industrial
@@ -459,6 +470,7 @@ class CaseFan(Part):
 class CpuCooler(Part):
 
     #general
+#    category = models.CharField(default="CPU Cooler",choices=(("CPU Cooler","CPU Cooler")), max_length=10)
     color = models.CharField(default="No Color", max_length=50,null=True,blank=True)
     size = models.IntegerField(choices=Fan_Size)
     type = models.CharField(default="Air Cooler", choices=Cpu_Fan_Type , max_length=50)# Air Cooler , Liquid Cooler , Passive  Cooler , Hybrid Cooler , Sub-Ambient Cooler
@@ -481,6 +493,7 @@ class CpuCooler(Part):
 class Cpu(Part):
 
     #general
+#    category = models.CharField(default="CPU",choices=(("CPU","CPU")), max_length=10)
     release_year = models.IntegerField(default=0)
     #socket
     socket = models.ForeignKey("motherBoard_Socket", on_delete=models.CASCADE)# cpu <---> motherboard
@@ -510,6 +523,7 @@ class Cpu(Part):
 class ExternalHardDrive(Part):
     
     #general
+#    category = models.CharField(default="External Hard Drive",choices=(("External Hard Drive","External Hard Drive")), max_length=10)
     pricePerGB = models.DecimalField(max_digits=6, decimal_places=5)
     features = models.TextField(default="")
     color = models.CharField(default="no color", max_length=50)
@@ -528,6 +542,7 @@ class ExternalHardDrive(Part):
 class FanController(Part):
     
     #general
+#    category = models.CharField(default="Case",choices=(("Fan Controller","Fan Controller")), max_length=10)
     features = models.TextField(default="")
     compatibility = models.CharField(default="", max_length=50)
     color = models.CharField(default="no color", max_length=50)
@@ -547,7 +562,7 @@ class FanController(Part):
 #----------------------------------------------------------------------------------------------------
 
 class headphones(Part):
-    
+#    category = models.CharField(default="Headphones",choices=(("Headphones","Headphones")), max_length=10)
     type = models.CharField(choices=headphones_Type , default="Circumaural" , max_length=50)## Circumaural , Supra-Aural , Earbud , In Ear 
     LfrequencyResponse = models.IntegerField(default=0)
     UfrequencyResponse = models.IntegerField(default=0)
@@ -565,7 +580,7 @@ class headphones(Part):
 #----------------------------------------------------------------------------------------------------
 
 class InternalHardDrive(Part):
-    
+#    category = models.CharField(default="Internal Hard Drive",choices=(("Internal Hard Drive","Internal Hard Drive")), max_length=10)
     type = models.CharField(default="HDD SATA", choices=InternalHardDrive_type , max_length=50)
     interface = models.CharField(default='',max_length=150)
     capacity = models.IntegerField(default=0)
@@ -580,7 +595,7 @@ class InternalHardDrive(Part):
 #----------------------------------------------------------------------------------------------------
 
 class Keyboard(Part):
-    
+#    category = models.CharField(default="Keyboard",choices=(("Keyboard","Keyboard")), max_length=10)
     style = models.CharField(default="", max_length=50)
     switches = models.CharField(default="", max_length=50)
     backlit = models.CharField(default="no Back-Light", max_length=50)
@@ -599,6 +614,7 @@ class Keyboard(Part):
 class Memory(Part):
     
     #general
+#    category = models.CharField(default="Memory",choices=(("Memory","Memory")), max_length=10)
     generation = models.IntegerField(default=0)
     speed = models.IntegerField(default=0)
     pricePerGB = models.DecimalField(max_digits=7, decimal_places=5)
@@ -620,6 +636,7 @@ class Monitor(Part):
     
 
     #Desplay info
+#    category = models.CharField(default="Monitor",choices=(("Monitor","Monitor")), max_length=10)
     screenSize = models.DecimalField(max_digits=4, decimal_places=2)
     resolution = models.CharField(default="1366x768" , choices=resolutions , max_length=50)##
     refreshRate = models.IntegerField(default=0)
@@ -638,6 +655,7 @@ class Monitor(Part):
 class MotherBoard(Part):
     
     #main attribute
+#    category = models.CharField(default="MotherBoard",choices=(("MotherBoard","MotherBoard")), max_length=10)
     color = models.CharField(default="no color", max_length=50)
     additional_features = models.TextField(default="")
     #CPU socket
@@ -677,6 +695,7 @@ class MotherBoard(Part):
     #extansion_capabilities
     pci_slots = models.SmallIntegerField(default=0)
     pcie_x1_slots = models.SmallIntegerField(default=0)
+    pcie_x2_slots = models.SmallIntegerField(default=0)
     pcie_x4_slots = models.SmallIntegerField(default=0)
     pcie_x8_slots = models.SmallIntegerField(default=0)
     pcie_x16_slots = models.SmallIntegerField(default=0)
@@ -692,6 +711,7 @@ class MotherBoard(Part):
 
 class Mouse(Part):
     
+#    category = models.CharField(default="Mouse",choices=(("Mouse","Mouse")), max_length=10)
     tracking_method = models.CharField(default="Optical" , choices=mouse_tracking_methods , max_length=50)##Touchpad , Optical , Laser , Trackball
     max_dpi = models.IntegerField(default=0)
     hand_orientation = models.CharField(default="Right" , choices=mouse_hand_orientation , max_length=50)##Both , Right , Left
@@ -707,6 +727,7 @@ class Mouse(Part):
 class OpticalDrive(Part):
     
     #general
+#    category = models.CharField(default="Optical Drive",choices=(("Optical Drive","Optical Drive")), max_length=10)
     features = models.TextField(default="")
     #blu-ray
     bd = models.IntegerField(default=0,null=True,blank=True)
@@ -742,6 +763,7 @@ class OS(models.Model):
 
 class PowerSupply(Part):
     
+#    category = models.CharField(default="Power Supply",choices=(("Power Supply","Power Supply")), max_length=10)
     type = models.CharField(default="ATX" , choices=(("ATX","ATX"),("SFX","SFX")) , max_length=50)
     efficiency = models.CharField(default="Plus", choices=power_supply_efficiency , max_length=50)# Plus < Bronze < Gold < Platinum < Titanium
     wattage = models.IntegerField(default=0)
@@ -765,6 +787,7 @@ class PowerSupply(Part):
  
 class SoundCard(Part):
      
+#    category = models.CharField(default="Sound Card",choices=(("Sound Card","Sound Card")), max_length=10)
     channels = models.FloatField()
     digital_audio = models.IntegerField(null=True,blank=True)
     snr = models.IntegerField(default=0,null=True,blank=True)
@@ -781,6 +804,7 @@ class SoundCard(Part):
 
 class Speakers(Part):
     
+#    category = models.CharField(default="Speakers",choices=(("Speakers","Speakers")), max_length=10)
     color =  models.CharField(default="no color", max_length=50)
     configuration = models.FloatField()
     wattage = models.IntegerField(default=0)
@@ -795,7 +819,7 @@ class Speakers(Part):
 #----------------------------------------------------------------------------------------------------
 
 class ThermalPaste(Part):
-    
+#    category = models.CharField(default="Thermal Paste",choices=(("Thermal Paste","Thermal Paste")), max_length=10)
     amountInOne = models.FloatField()
     features = models.TextField(default="")
     
@@ -807,7 +831,7 @@ class ThermalPaste(Part):
 
 class VideoCard(Part):
 
-    
+#    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     chipset = models.CharField(default="", max_length=100)
     GRAM = models.IntegerField(default=0)
     coreClock = models.FloatField(default=0,null=True,blank=True)
@@ -826,6 +850,7 @@ class VideoCard(Part):
 
 class Webcam(Part):
     
+#    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     resolutions = models.CharField(default="360P" , choices=cam_Resolutions , max_length=10)
     connection = models.CharField(default="", max_length=50)
     focus_type = models.CharField(default="Manual" , choices=focus_types , max_length=10)#Manual , Auto , Fixed
@@ -842,6 +867,7 @@ class Webcam(Part):
 
 class WiresNetworkCard(Part):
     
+#    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     interface = models.CharField(default="PCIe x1" , choices=Extention_Cards_interface ,max_length=20)
     color =  models.CharField(default="no color", max_length=50)
     features = models.TextField(default="")
@@ -855,6 +881,7 @@ class WiresNetworkCard(Part):
 
 class WirelessNetworkCard(Part):
     
+#    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     protocol = models.CharField(default="",max_length=50)
     interface = models.CharField(default="PCIe x1" , choices=Extention_Cards_interface ,max_length=20)
     color =  models.CharField(default="no color", max_length=50)

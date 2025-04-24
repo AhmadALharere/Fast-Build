@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'UserProfile',
     'PcPart',
     'contactUs',
+    'Cart',
     
     'rest_framework',
     'rest_framework.authtoken',
