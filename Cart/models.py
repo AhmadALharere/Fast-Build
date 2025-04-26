@@ -11,22 +11,16 @@ state_list = (
     ("Rejected","Rejected")
     )
 
-compitability_list = (
-    ("safe","safe"),
-    ("warning","warning"),
-    ("Danger","Danger"),
-    ("Undefined","Undefined")
-    )
 
 
 class ShopBascet(models.Model):
     
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now=True)
     total_cost = models.IntegerField(default=0)
-    state = models.CharField(default="Waiting",choices=state_list,max_length=10)
-    compitability = models.CharField(default="Undefined",max_length=10,choices=compitability_list) 
+    state = models.CharField(default="Waiting",choices=state_list,max_length=10) 
+    
 
     def __str__(self):
         return f"bascet {self.id} on date: {self.order_date}"
@@ -34,7 +28,7 @@ class ShopBascet(models.Model):
 
 class order(models.Model):
     
-    bascet = models.ForeignKey("ShopBascet", on_delete=models.CASCADE)
+    bascet = models.ForeignKey("ShopBascet",related_name='orders', on_delete=models.CASCADE)
     product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 

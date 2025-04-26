@@ -8,7 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-
+from .models import order,ShopBascet
+from .serializer import Cart_Serializer,BasketSerializer
 
 def compitability_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
     return (MotherBoard.form_Factor in Case.form_factor_support)
@@ -277,4 +278,56 @@ def is_collection_valid(request):
 
 
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt  # هنا يكون فعال لأنك خارج ال APIView class
+def Order_Cart(request):
+    data = request.data
+    parts = []
+    try:
+        for unit in data:#unpack and get data from database
+            parts.append([Part.objects.get(pk=unit[0]),unit[1]])    
+    except Exception as Ex:
+        print(f'Exciption:{Ex}/nAPI: Order_Cart/ndata:{data}')
+        return JsonResponse({"statues":"failed","massage":"Exception has been detecated while doing your order,please try again"}) 
+               
+    for part in parts:#test if there is enough piece in the storage
+        if part[0].in_storage >= part[1]:
+              part[0].in_storage-=part[1]
+              part[0].population+=part[1]
+        else:
+            return JsonResponse({"statues":"failed","massage":f"sorry but there is no enough piece of {part[0].name} in shop storage, yow can now only order {part[0].in_storage}"})
 
+    cart = ShopBascet.objects.create(
+    client = request.user,
+    total_cost = 0,
+    state = "Waiting") 
+    
+    for part in parts:
+        part[0].save()
+        order.objects.create(bascet = cart,
+                    product = part[0],
+                    quantity = part[1])
+        
+        cart.total_cost+= part[0].price
+    cart.save()
+    return JsonResponse({"statues":"success","massage":"order has been done successfully"})
+            
+
+class Cart_list(generics.ListAPIView):
+    serializer_class=Cart_Serializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]                                   
+    def get_queryset(self):
+        return ShopBascet.objects.filter(client=self.request.user).order_by('-order_date')
+
+
+
+
+class Cart_Details(generics.RetrieveDestroyAPIView):
+    serializer_class=BasketSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]                                   
+    def get_queryset(self):
+        return ShopBascet.objects.filter(client=self.request.user)

@@ -24,12 +24,13 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     #path('accounts/', include('UserProfile.urls')),
     path('admin/', admin.site.urls),
-    path('api-auth/',include('rest_framework.urls')),
-    path('api/auth/', include('dj_rest_auth.urls')),               # login, logout, password change/reset
-    path('api/auth/', include('allauth.socialaccount.urls')),      
-    path('api/auth/', include('UserProfile.urls')),      
     
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # register, email confirm
+    path('api-auth/',include('rest_framework.urls')),
+    path('api/auth/', include('dj_rest_auth.urls')),               # login, logout, password change/reset
+    path('api/auth/social/', include('allauth.socialaccount.urls')),      
+    path('api/auth/user/', include('UserProfile.urls')),      
+    
     path('api/Cart/',include('Cart.urls')),
     path('PcParts/',include('PcPart.urls')),
     

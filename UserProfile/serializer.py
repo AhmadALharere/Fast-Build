@@ -1,6 +1,20 @@
 from rest_framework import serializers
 from .models import profile
 from django.contrib.auth.models import User
+from dj_rest_auth.registration.serializers import RegisterSerializer
+
+
+
+
+class CustomRegisterSerializer(RegisterSerializer):
+    
+    def validate_email(self, value):
+        print("validate_email called!")
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Email is already in use.")
+        return value
+
+
 
 
 class User_Serializer(serializers.ModelSerializer):
@@ -10,9 +24,6 @@ class User_Serializer(serializers.ModelSerializer):
         model = User
         fields = ['username','first_name','last_name','email']
         
-
-    
-  
 
 
 class Profile_Serializer(serializers.ModelSerializer):

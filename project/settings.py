@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     
+    'dj_rest_auth.registration', 
     'dj_rest_auth',
     
     "django.contrib.sites",
@@ -57,8 +58,7 @@ INSTALLED_APPS = [
  
     'allauth.socialaccount.providers.google',
  
- 
-    'dj_rest_auth.registration',   
+   
 ]
 
 SITE_ID = 1
@@ -141,8 +141,14 @@ WSGI_APPLICATION = 'project.wsgi.application'
 #}
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'UserProfile.serializer.CustomRegisterSerializer'
+}
+
 
 DATABASES = {
     "default": {

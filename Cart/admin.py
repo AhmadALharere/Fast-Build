@@ -8,7 +8,7 @@ from .models import ShopBascet,order,Descount
 from django.db.models import Exists, OuterRef
 
 
-
+'''
 class IncompleteOrdersFilter(admin.SimpleListFilter):
     title = "uncomplete bascets"  # عنوان الفلتر في Django Admin
     parameter_name = "incomplete_orders"  # اسم المعامل المستخدم في الاستعلام
@@ -53,5 +53,5 @@ class Shop_Bascet_admin(admin.ModelAdmin):
     list_filter = [IncompleteOrdersFilter]
     
     
-    
-admin.site.register(ShopBascet,Shop_Bascet_admin)
+    '''
+admin.site.register(ShopBascet)
