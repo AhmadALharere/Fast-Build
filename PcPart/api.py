@@ -1,9 +1,9 @@
 
 from django.http import JsonResponse
 from rest_framework import generics
-from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, Radiator_size , FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, OS, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
+from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, Radiator_size , FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive,  PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
 import json
-from .serializer import CeseSerializer,CaseAccessorySerializer,CeseFanSerializer,CpuCoolerSerializer,CpuSerializer,VideoCardSerializer,MouseSerializer,ExternalHardDriveSerializer,FanControllerSerializer,headphonesSerializer,InternalHardDriveSerializer,KeyboardSerializer,MemorySerializer,MonitorSerializer,MotherBoardSerializer,OpticalDriveSerializer,PowerSupplySerializer,SoundCardSerializer,SpeakersSerializer,WiresNetworkCardSerializer,WirelessNetworkCardSerializer,WebcamSerializer,ThermalPasteSerializer,OSSerializer,serializers
+from .serializer import CeseSerializer,CaseAccessorySerializer,CeseFanSerializer,CpuCoolerSerializer,CpuSerializer,VideoCardSerializer,MouseSerializer,ExternalHardDriveSerializer,FanControllerSerializer,headphonesSerializer,InternalHardDriveSerializer,KeyboardSerializer,MemorySerializer,MonitorSerializer,MotherBoardSerializer,OpticalDriveSerializer,PowerSupplySerializer,SoundCardSerializer,SpeakersSerializer,WiresNetworkCardSerializer,WirelessNetworkCardSerializer,WebcamSerializer,ThermalPasteSerializer,serializers
 
 
 
@@ -671,63 +671,6 @@ def load_OpticalDrive(request):
     #return JsonResponse("something went wrong...",safe=False)
 
 
-def OSModeDecliration(mode):
-    mode.sort()
-    if mode==[32]:
-        return 1
-    elif mode==[64]:
-        return 2
-    elif mode==[32,64]:
-        return 5
-    elif mode==[86]:
-        return 3
-    elif mode==[64,86]:
-        return 6
-    elif mode==[128]:
-        return 4
-    else:
-        return 0
-
-
-def load_OS(request):
-    
-    #if request.method == 'POST':
-        
-        for FC in OS.objects.all():
-                FC.delete()
-        
-        
-        json_file = open("PcPart/data/Parts/os.json","r")
-        data = json.load(json_file)
-        
-        i=0
-        for id,item in enumerate(data):
-            
-            i+=1 
-            try:    
-                Ffeatures = ""
-                for statement in item['features']:
-                    Ffeatures+=statement+' , '
-                
-                
-                
-                Os = OS.objects.create(
-                id = id,
-                name = item['name'],
-                price = item['price'] if item['price']!=None else 0,
-                features = Ffeatures,
-                mode = OSModeDecliration(item['mode']),
-                max_memory = item['max_memory'],
-                population = 0,#increase in every order by one
-                )
-                         
-            except Exception as EX:
-                return JsonResponse(f"field in id {i} name: {item['name']}-------Error Code: {EX}-------item: {item}",safe=False)
-        return JsonResponse("success!!",safe=False)
-            
-    #return JsonResponse("something went wrong...",safe=False)
-
-
 
 def load_PowerSupply(request):
     
@@ -1181,7 +1124,6 @@ def reset_dataBase(request):
     resaults+=f"load_Monitor : {load_Monitor(request).content.decode('utf-8')}    , "
     resaults+=f"load_Mouse : {load_Mouse(request).content.decode('utf-8')}    , "
     resaults+=f"load_OpticalDrive : {load_OpticalDrive(request).content.decode('utf-8')}    , "
-    resaults+=f"load_OS : {load_OS(request).content.decode('utf-8')}    , "
     resaults+=f"load_PowerSupply : {load_PowerSupply(request).content.decode('utf-8')}    , "
     resaults+=f"load_SoundCard : {load_SoundCard(request).content.decode('utf-8')}    , "
     resaults+=f"load_Speakers : {load_Speakers(request).content.decode('utf-8')}    , "

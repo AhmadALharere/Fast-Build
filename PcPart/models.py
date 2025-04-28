@@ -754,22 +754,6 @@ class OpticalDrive(Part):
 
 #----------------------------------------------------------------------------------------------------
 
-class OS(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(default="", max_length=100)
-    price = models.DecimalField( max_digits=6, decimal_places=2)
-    mode = models.SmallIntegerField(default=2,choices=OSModes)##
-    max_memory = models.IntegerField(default=0)
-    features = models.TextField(default="")
-    population = models.IntegerField(default=0)#increase in every order by one
-    #image
-    #image_filename = models.ImageField(_upload_to=None, height_field=None, width_field=None, max_length=None)
-
-    def __str__(self):
-        return self.name
-
-#----------------------------------------------------------------------------------------------------
-
 class PowerSupply(Part):
     
 #    category = models.CharField(default="Power Supply",choices=(("Power Supply","Power Supply")), max_length=10)

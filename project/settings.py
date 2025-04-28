@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'PcPart',
     'contactUs',
     'Cart',
-    'T_home',
+    'home',
     
     'rest_framework',
     'rest_framework.authtoken',

@@ -19,7 +19,6 @@ urlpatterns = [
     path('load MotherBoard From File', api.load_MotherBoard,name="LoadMotherBoard"),
     path('load Mouse From File', api.load_Mouse,name="LoadMouse"),
     path('load OpticalDrive From File', api.load_OpticalDrive,name="LoadOpticalDrive"),
-    path('load OS From File', api.load_OS,name="LoadOS"),
     path('load PowerSupply From File', api.load_PowerSupply,name="LoadPowerSupply"),
     path('load SoundCard From File', api.load_SoundCard,name="LoadSoundCard"),
     path('load Speakers From File', api.load_Speakers,name="LoadSpeakers"),

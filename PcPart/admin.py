@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, OS, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
+from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
 from .models import Radiator_size
 # Register your models here.
 
@@ -36,8 +36,6 @@ admin.site.register(Mouse)
 admin.site.register(MotherBoard)
 
 admin.site.register(OpticalDrive)
-
-admin.site.register(OS)
 
 admin.site.register(PowerSupply)
 

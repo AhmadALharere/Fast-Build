@@ -33,7 +33,7 @@ urlpatterns = [
     
     path('api/Cart/',include('Cart.urls')),
     path('api/PcParts/',include('PcPart.urls')),
-    path('api/home/',include('T_home.urls')),
+    path('api/home/',include('home.urls')),
     
 ]
 

@@ -13,7 +13,7 @@ state_list = (
 
 
 
-class ShopBascet(models.Model):
+class ShopBasket(models.Model):
     
     id = models.AutoField(primary_key=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -28,12 +28,12 @@ class ShopBascet(models.Model):
 
 class order(models.Model):
     
-    bascet = models.ForeignKey("ShopBascet",related_name='orders', on_delete=models.CASCADE)
+    basket = models.ForeignKey("ShopBasket",related_name='orders', on_delete=models.CASCADE)
     product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     price = models.FloatField(default=0.0)
     def __str__(self):
-        return f"order in {self.bascet}"
+        return f"order in {self.basket}"
     
     
 

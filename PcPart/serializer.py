@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, OS, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
+from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive,  PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
 from .models import Radiator_size
 
 
@@ -153,15 +153,7 @@ class OpticalDriveSerializer(serializers.ModelSerializer):
         model= OpticalDrive
         fields= "__all__"
       
-      
-      
-class OSSerializer(serializers.ModelSerializer):
-        
-    class Meta:
-            
-        model= OS
-        fields= "__all__"
-      
+   
       
       
 class PowerSupplySerializer(serializers.ModelSerializer):
