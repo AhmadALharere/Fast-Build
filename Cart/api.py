@@ -8,8 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from .models import order,ShopBascet
+from .models import order,ShopBascet,Discount
 from .serializer import Cart_Serializer,BasketSerializer
+from datetime import date
 
 def compitability_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
     return (MotherBoard.form_Factor in Case.form_factor_support)
@@ -164,6 +165,33 @@ def compitability_CPU_Cooling(CPU):#Warning if it false
 def compitability_CPU_Memory(CPU,Memorys):#Danger if it false
         return CPU.max_memory_support>=Memorys.__len__()
 
+
+def chick_discount(part):
+    outputs = [False,0]
+    try:
+        discount = Discount.objects.get(part=part.Gid)
+    except Discount.DoesNotExist:
+        return outputs#state,price
+    today = date.today()
+    
+    if discount.is_valid:
+        if discount.start_date<=today and discount.end_date>=today:
+            outputs=[True,discount.new_price]
+        else:
+            discount.is_valid=False
+            discount.save()
+            
+    return outputs
+
+
+def get_price(part,is_descount):
+    outputs = chick_discount(part)
+    if outputs[0]:
+        return [is_descount==True,outputs[1]]
+    else:
+        return [is_descount==False,part.price]
+
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -287,7 +315,7 @@ def Order_Cart(request):
     parts = []
     try:
         for unit in data:#unpack and get data from database
-            parts.append([Part.objects.get(pk=unit[0]),unit[1]])    
+            parts.append([Part.objects.get(pk=unit[0]),unit[1],unit[2]==1])    
     except Exception as Ex:
         print(f'Exciption:{Ex}/nAPI: Order_Cart/ndata:{data}')
         return JsonResponse({"statues":"failed","massage":"Exception has been detecated while doing your order,please try again"}) 
@@ -298,19 +326,30 @@ def Order_Cart(request):
               part[0].population+=part[1]
         else:
             return JsonResponse({"statues":"failed","massage":f"sorry but there is no enough piece of {part[0].name} in shop storage, yow can now only order {part[0].in_storage}"})
+    prices = []
+    for part in parts:
+        price_data = get_price(part[0],part[2])
+        if part[2]!=price_data[0]:
+            if part[2]:
+                return JsonResponse({"statues":"failed","massage":f"the discount in piece {part[0].name} has been disapeared , it`s price now is {part[0].price}$"})
+        prices.append([price_data[0],price_data[1]])
+        
+
 
     cart = ShopBascet.objects.create(
     client = request.user,
     total_cost = 0,
     state = "Waiting") 
-    
+    i = 0
     for part in parts:
         part[0].save()
         order.objects.create(bascet = cart,
                     product = part[0],
-                    quantity = part[1])
+                    quantity = part[1],
+                    price=prices[i][1])
         
-        cart.total_cost+= part[0].price
+        cart.total_cost+= prices[i][1]
+        i+=1
     cart.save()
     return JsonResponse({"statues":"success","massage":"order has been done successfully"})
             

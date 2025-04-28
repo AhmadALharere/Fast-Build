@@ -1,5 +1,6 @@
 from django.db import models
 from model_utils.managers import InheritanceManager
+from django.contrib.contenttypes.models import ContentType
 # Create your models here.
 #app name: PcPart
 #----------------------------------------------------------------------------------------------------
@@ -381,13 +382,21 @@ class Part(models.Model):
     in_storage = models.IntegerField(default=0)
     #Rate = models.DecimalField(max_digits=3, decimal_places=2)
     #image
-    image_filename = models.ImageField(upload_to=imageSaver)
+    image_filename = models.ImageField(upload_to=imageSaver,null=True,blank=True)
+    content_type = models.ForeignKey(ContentType,null=True, on_delete=models.CASCADE, editable=False)
+
     
     objects = InheritanceManager()
 
-    def increase_storage(self,amount):
-        self.in_storage += amount
-        self.save()
+    
+    def __str__(self):
+        return self.name
+    
+    
+    def save(self, *args, **kwargs):
+        if not self.content_type_id:
+            self.content_type = ContentType.objects.get_for_model(self)
+        super().save(*args, **kwargs)
 #----------------------------------------------------------------------------------------------------
 
 class Case(Part):

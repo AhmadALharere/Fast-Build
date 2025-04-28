@@ -18,12 +18,12 @@ class ShopBascet(models.Model):
     id = models.AutoField(primary_key=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now=True)
-    total_cost = models.IntegerField(default=0)
+    total_cost = models.FloatField(default=0.0)
     state = models.CharField(default="Waiting",choices=state_list,max_length=10) 
     
 
     def __str__(self):
-        return f"bascet {self.id} on date: {self.order_date}"
+        return f"bascet {self.id}"
 
 
 class order(models.Model):
@@ -31,25 +31,23 @@ class order(models.Model):
     bascet = models.ForeignKey("ShopBascet",related_name='orders', on_delete=models.CASCADE)
     product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-
+    price = models.FloatField(default=0.0)
     def __str__(self):
-        return self.product
+        return f"order in {self.bascet}"
     
     
 
 
-class Descount(models.Model):
+class Discount(models.Model):
     
     id = models.AutoField(primary_key=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    quantity = models.PositiveIntegerField()
-    is_quantity_limit = models.BooleanField()
-    is_dated_limit = models.BooleanField()
-    part = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
-    
+    is_valid = models.BooleanField()
+    part = models.OneToOneField("PcPart.Part", on_delete=models.CASCADE)
+    new_price = models.FloatField(default=0.0)
     
 
     def __str__(self):
-        return f"descount on {self.part}"    
+        return f"discount on {self.part}"    
     

@@ -32,7 +32,8 @@ urlpatterns = [
     path('api/auth/user/', include('UserProfile.urls')),      
     
     path('api/Cart/',include('Cart.urls')),
-    path('PcParts/',include('PcPart.urls')),
+    path('api/PcParts/',include('PcPart.urls')),
+    path('api/home/',include('T_home.urls')),
     
 ]
 
