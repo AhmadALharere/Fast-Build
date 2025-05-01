@@ -153,6 +153,11 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
 REST_AUTH = {
     'REGISTER_SERIALIZER': 'UserProfile.serializer.CustomRegisterSerializer'
+    ,    # يُلزم وجود الحقل old_password في الطلب ويُفعّل التحقق به
+    'OLD_PASSWORD_FIELD_ENABLED': True,
+
+    # (اختياري) إذا أردت إبقاء المستخدم مسجَّل دخول بعد التغيير
+    'LOGOUT_ON_PASSWORD_CHANGE': False,
 }
 
 

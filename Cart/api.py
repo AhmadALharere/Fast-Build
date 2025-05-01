@@ -236,8 +236,6 @@ def is_collection_valid(request):
                     num-=1
                     
         except Exception as Ex:
-                if Ex.__str__()=="not enough values to unpack (expected 2, got 1)":
-                    return JsonResponse({'statues':'Field','compitability':'Undefined','massege':f'this cart is not represent a BC collection'})    
                 print(f'Exciption:{Ex}/nAPI: Is_collection_Valid/ndata:{data}')
                 return JsonResponse({'statues':'Field','compitability':'Undefined','massege':'Exception has been detecated'})
         for keys in ['Case',
