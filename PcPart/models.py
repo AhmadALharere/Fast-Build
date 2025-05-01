@@ -384,7 +384,7 @@ class Part(models.Model):
     #image
     image_filename = models.ImageField(upload_to=imageSaver,null=True,blank=True)
     content_type = models.ForeignKey(ContentType,null=True, on_delete=models.CASCADE, editable=False)
-
+    date_created = models.DateField(auto_now=True)
     
     objects = InheritanceManager()
 

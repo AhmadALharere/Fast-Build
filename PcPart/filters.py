@@ -4,10 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 
 class PartFilter(django_filters.FilterSet):
     part_type = django_filters.CharFilter(method='filter_by_type')
+    min_price = django_filters.NumberFilter(field_name='price',lookup_expr='gte')
+    max_price = django_filters.NumberFilter(field_name='price',lookup_expr='lte')
 
     class Meta:
         model = Part
-        fields = ['part_type']
+        fields = ['part_type','min_price','max_price']
 
     def filter_by_type(self, queryset, name, value):
         if not value:
