@@ -3,8 +3,8 @@
 API Docs:
 ## Base URL:http://localhost:8000/api
 ## Authentication:
-    -**Type**:Token Authentication
-    - **Header**(for authenticated endpoints): Authorization: Token <your_token_here>
+**Type**:Token Authentication
+**Header**(for authenticated endpoints): Authorization: Token <your_token_here>
 ---
 
 ## End Points:
@@ -17,7 +17,7 @@ API Docs:
 | **Method**         | `POST`                                        |
 | **Authentication** | Not Required                                  |
 | **Content-Type**   | `application/json`                            |
-| **Description**    | Log in with username or email and password.   |
+| **Description**    | `Log in with username or email and password.` |
 
 #### Request Body
 
@@ -41,11 +41,11 @@ or
 
 | Property           | Value                                         |
 |--------------------|-----------------------------------------------|
-| **URL**            | `/auth/logout/                                |
+| **URL**            | `/auth/logout/`                               |
 | **Method**         | `POST`                                        |
 | **Authentication** | Required                                      |
 | **Content-Type**   | null                                          |
-| **Description**    | Log out from current user                     |
+| **Description**    | `Log out from current user`                   |
 
 #### Request Body
 
@@ -292,7 +292,7 @@ null
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
-| **URL**            | `/Cart/My-Orders`                                                    |
+| **URL**            | `/Cart/My-Orders/`                                                   |
 | **Method**         | `GET`                                                                |
 | **Authentication** | Required                                                             |
 | **Content-Type**   | null                                                                 |
@@ -327,7 +327,7 @@ null
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
-| **URL**            | `/Cart/My-Orders`                                                    |
+| **URL**            | `/Cart/My-Orders/<cart_id>`                                          |
 | **Method**         | `GET`                                                                |
 | **Authentication** | Required                                                             |
 | **Content-Type**   | null                                                                 |
@@ -355,7 +355,7 @@ null
             "orders": [
                 {
                     "part_detail": {
-                        "Gid": 3,
+                        "id": 3,
                         "name": "sstey",
                         "price": 4345.0,
                         "image_filename": null
@@ -364,7 +364,7 @@ null
                 },
                 {
                     "part_detail": {
-                        "Gid": 4,
+                        "id": 4,
                         "name": "zthsy",
                         "price": 567.0,
                         "image_filename": null
@@ -416,3 +416,25 @@ null
 
     -in filter.part_type, categury name is:
     'case','caseaccessory','casefan','cpu','cpucooler','motherboart','externalharddrive','internalharddrive','fancontroller','headphones','keyboard','memory','monitor','opticaldrive','mouse','powersupply','soundcard','speakers','thermalpaste','videocard','webcam','wiresnetworkcard','wirelessnetworkcard'
+
+## 13. Part Details
+
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/home/Parts/<int:id>`                                               |
+| **Method**         | `GET`                                                                |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | null                                                                 |
+| **Description**    | `get Details of the wanted Part`                                     | 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                    |
+|---------------------|-------------------------------------------------------------------------|
+| **200 OK**          | `<wanted object>`                                                       |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
+
+

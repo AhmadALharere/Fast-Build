@@ -1,4 +1,6 @@
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
+from .models import Notification , Like
 # Register your models here.
-admin.site.register(ContentType)
+
+admin.site.register(Notification)
+admin.site.register(Like)

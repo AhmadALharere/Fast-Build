@@ -2,7 +2,7 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from PcPart.filters import PartFilter
 from PcPart.models import Part
-from .serializers import PartSerializer
+from .serializers import PartSerializer,PartDetailsSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
@@ -12,7 +12,6 @@ class part_paginator(PageNumberPagination):
     page_size=20
     page_size_query_param="page_size"
     max_page_size=50
-
 
 
 
@@ -28,7 +27,12 @@ class PartListView(generics.ListAPIView):
     ordering_fields = ['liked','population','price','date_created']
 
 
-
+class PartDetailsView(generics.RetrieveAPIView):
+    queryset = Part.objects.select_subclasses().all()
+    serializer_class = PartDetailsSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
 
     
     

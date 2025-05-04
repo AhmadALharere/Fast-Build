@@ -374,12 +374,12 @@ class motherBoard_Socket(models.Model):
 
 class Part(models.Model):
     
-    Gid = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(default="", max_length=200)
     price = models.FloatField()
     population = models.IntegerField(default=0)#increase in every order by one
-    liked = models.IntegerField(default=0)
-    in_storage = models.IntegerField(default=0)
+    like_count = models.PositiveBigIntegerField(default=0)
+    in_storage = models.PositiveIntegerField(default=0)
     #Rate = models.DecimalField(max_digits=3, decimal_places=2)
     #image
     image_filename = models.ImageField(upload_to=imageSaver,null=True,blank=True)
@@ -681,7 +681,7 @@ class MotherBoard(Part):
     memory_Slots = models.SmallIntegerField(default=0)
     supported_ddr_version = models.CharField(default="DDR4" , choices=ddr_versions , max_length=10)
     supported_memory_frequencies = models.CharField(default="", max_length=80)
-    xmp_support = models.BooleanField()
+    Extreme_Memory_Profile_support = models.BooleanField()
     memory_channels = models.CharField(default="Single Channel" , choices=memory_channels_list , max_length=50)
     max_capacity_per_slot = models.IntegerField(default=0)
     #storage
@@ -739,14 +739,14 @@ class OpticalDrive(Part):
 #    category = models.CharField(default="Optical Drive",choices=(("Optical Drive","Optical Drive")), max_length=10)
     features = models.TextField(default="")
     #blu-ray
-    bd = models.IntegerField(default=0,null=True,blank=True)
-    bd_write = models.CharField(default="", max_length=50,null=True,blank=True)# BD-R / BD-R DL / BD-RE / BD-RE DL
+    blu_ray_read_speed = models.IntegerField(default=0,null=True,blank=True)
+    blu_ray_write_speed = models.CharField(default="", max_length=50,null=True,blank=True)# BD-R / BD-R DL / BD-RE / BD-RE DL
     #dvd
-    dvd = models.IntegerField(default=0,null=True,blank=True)
-    dvd_write = models.CharField(default="", max_length=50,null=True,blank=True)# DVD-R / DVD-RW / DVD+RW / DVD+R / DVD-R DL / DVD+R DL / DVD-RAM
+    dvd_read_speed = models.IntegerField(default=0,null=True,blank=True)
+    dvd_write_speed = models.CharField(default="", max_length=50,null=True,blank=True)# DVD-R / DVD-RW / DVD+RW / DVD+R / DVD-R DL / DVD+R DL / DVD-RAM
     #cd
-    cd = models.IntegerField(default=0,null=True,blank=True)
-    cd_write = models.CharField(default="", max_length=50,null=True,blank=True)# CD-R / CD-RW
+    cd_read_speed = models.IntegerField(default=0,null=True,blank=True)
+    cd_write_speed = models.CharField(default="", max_length=50,null=True,blank=True)# CD-R / CD-RW
 
 
     def __str__(self):

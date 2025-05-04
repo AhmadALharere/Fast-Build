@@ -1,62 +1,24 @@
 from rest_framework import serializers
 from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive,  PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
-from .models import Radiator_size
 
 
-class CeseSerializer(serializers.ModelSerializer):
+
+
+class CaseSerializer(serializers.ModelSerializer):
+
+    build_in_power_supply = serializers.CharField(source='psu')
+    form_factor_support = serializers.StringRelatedField(many=True)
+    fan_120mm_capacity = serializers.IntegerField(source='fan_120mm_support')
+    fan_140mm_capacity = serializers.IntegerField(source='fan_140mm_support')
+    external_525_bays = serializers.IntegerField(source='socket5_25')
+    internal_35_bays = serializers.IntegerField(source='socket3_5')
+    internal_25_bays = serializers.IntegerField(source='socket2_5')
     
-    form_factor_support = serializers.ListField(
-        child=serializers.CharField(), write_only=True
-    )
-    radiator_support = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True
-    )
-    
+
     class Meta:
-       model = Case
-       fields =  [
-            'name',
-            'price',
-            'type',
-            'color',
-            'side_panel',
-            'psu',
-            'form_factor_support',
-            'cpu_cooler_clearance',
-            'radiator_support',
-            'gpu_clearance',
-            'socket5_25',
-            'socket3_5',
-            'socket2_5',
-            'fan_120mm_support',
-            'fan_140mm_support',
-            
-        ]
-        
-    def create(self, validated_data):
-        
-        # الحقول الافتراضية
-        validated_data['population'] = 0
-        validated_data['in_storage'] = 0
-
-        forms_names = validated_data.pop('form_factor_support', [])
-        radiator_support_sizes = validated_data.pop('radiator_support', [])
-        #print("finish, value : "+validated_data.get("external_525_bays"))
-        case = Case.objects.create(**validated_data )
-        # Retrieve or create items by their names
-        forms = []
-        radiators = []
-        for name in forms_names:
-            item, _ = Form_Factor.objects.get_or_create(name=name)
-            forms.append(item)
-        for size in radiator_support_sizes:
-            item, _ = Radiator_size.objects.get_or_create(size=size)
-            radiators.append(item)
-        
-        case.form_factor_support.set(forms)
-        case.radiator_support.set(radiators)
-        case.save()
-        return case
+        model=Case
+        fields=['type','color','side_panel','build_in_power_supply','form_factor_support','fan_120mm_capacity','fan_140mm_capacity','cpu_cooler_clearance','radiator_support','gpu_clearance','external_525_bays','internal_35_bays','internal_25_bays']    
+    
     
     
 class CaseAccessorySerializer(serializers.ModelSerializer):
@@ -65,8 +27,9 @@ class CaseAccessorySerializer(serializers.ModelSerializer):
             
         model= CaseAccessory
         fields= "__all__"
-      
-      
+   
+   
+         
 class ExternalHardDriveSerializer(serializers.ModelSerializer):
         
     class Meta:
@@ -80,16 +43,28 @@ class FanControllerSerializer(serializers.ModelSerializer):
     class Meta:
             
         model= FanController
-        fields= "__all__"
+        exclude= ['formFactor']
       
+
       
 class headphonesSerializer(serializers.ModelSerializer):
         
+    frequency_Response = serializers.SerializerMethodField(read_only=True)
+    is_wireless = serializers.SerializerMethodField(read_only=True)
+    enclosure_type = serializers.CharField(source='enclosureType')
     class Meta:
             
         model= headphones
-        fields= "__all__"
+        fields= ['type','microphone','is_wireless','enclosure_type','color','frequency_Response','features']
       
+  
+    def get_frequency_Response(self,obj):
+        return f" {obj.LfrequencyResponse}Hz ~ {obj.UfrequencyResponse}Hz "
+   
+    
+    def get_is_wireless(self,obj):
+        return "Yes" if obj.wireless else "No"
+   
       
       
 class InternalHardDriveSerializer(serializers.ModelSerializer):
@@ -139,6 +114,7 @@ class MouseSerializer(serializers.ModelSerializer):
       
 class MotherBoardSerializer(serializers.ModelSerializer):
         
+        
     class Meta:
             
         model= MotherBoard
@@ -153,7 +129,7 @@ class OpticalDriveSerializer(serializers.ModelSerializer):
         model= OpticalDrive
         fields= "__all__"
       
-   
+      
       
       
 class PowerSupplySerializer(serializers.ModelSerializer):
@@ -175,13 +151,20 @@ class SoundCardSerializer(serializers.ModelSerializer):
       
       
 class SpeakersSerializer(serializers.ModelSerializer):
+       
+    frequency_Response = serializers.SerializerMethodField(read_only=True)
+    
         
     class Meta:
             
         model= Speakers
-        fields= "__all__"
+        fields= ['category','color','configuration','wattage','frequency_Response','features']
       
       
+      
+    def get_frequency_Response(self,obj):
+        return f" {obj.LfrequencyResponse}Hz ~ {obj.UfrequencyResponse}Hz "
+  
       
 class ThermalPasteSerializer(serializers.ModelSerializer):
         
@@ -218,56 +201,60 @@ class WiresNetworkCardSerializer(serializers.ModelSerializer):
       
         
         
-class CeseFanSerializer(serializers.ModelSerializer):
+class CaseFanSerializer(serializers.ModelSerializer):
+    
+    rpm = serializers.SerializerMethodField()
+    airflow = serializers.SerializerMethodField()
+    noise_level = serializers.SerializerMethodField()
     
     
     class Meta:
        model = CaseFan
-       fields =  "__all__"
+       fields =  ['rpm','airflow','noise_level','size','color','fan_type','compatibility','rgb_support','features']
        
-           
+    def get_rpm(self,obj):
+        return f" {obj.Lrpm} ~ {obj.Urpm} "
+    def get_airflow(self,obj):
+        return f" {obj.Lairflow} ~ {obj.Uairflow} "
+    def get_noise_level(self,obj):
+        return f" {obj.Lnoise_level} ~ {obj.Unoise_level} "
+  
+        
            
 class CpuCoolerSerializer(serializers.ModelSerializer):
+    
+    rpm = serializers.SerializerMethodField()
+    noise_level = serializers.SerializerMethodField()
     
     
     class Meta:
        model = CpuCooler
-       fields =  "__all__"
+       fields =  ['color','size','type','rpm','noise_level','compatibility','cooler_height','features']
     
-       
-    def create(self, validated_data):
-        
-        # الحقول الافتراضية
-        validated_data['population'] = 0
-        validated_data['ammount'] = 10
-
-        #print("finish, value : "+validated_data.get("external_525_bays"))
-        cpucooler = CpuCooler.objects.create(**validated_data )
-        cpucooler.save()
-        return cpucooler
-    
+    def get_rpm(self,obj):
+        return f" {obj.Lrpm} ~ {obj.Urpm} "
+    def get_noise_level(self,obj):
+        return f" {obj.Lnoise_level} ~ {obj.Unoise_level} "
   
   
 class CpuSerializer(serializers.ModelSerializer):
+    socket = serializers.StringRelatedField()
+    tdp = serializers.SerializerMethodField()
+    cooling_included = serializers.SerializerMethodField()
+    Simultaneous_Multithreading = serializers.SerializerMethodField()
+    
     
     class Meta:
        model = Cpu
-       fields =  "__all__"
-        
-    def create(self, validated_data):
-        
-        # الحقول الافتراضية
-        validated_data['population'] = 0
-        validated_data['ammount'] = 10
-
-        socketName = validated_data.pop('socket')
-        #print("finish, value : "+validated_data.get("external_525_bays"))
-        cpu = Cpu.objects.create(**validated_data )
-        # Retrieve or create items by their names
-        cpu.socket = motherBoard_Socket.objects.get_or_create(name=socketName)
-        cpu.save()
-        return cpu
-  
+       fields =  ['release_year','socket','core_count','core_clock','boost_clock','tdp','max_memory_support','cooling_included','graphics','Simultaneous_Multithreading']
+       
+    def get_tdp(self,obj):
+        return f"{obj.tdp} W"
+    def get_cooling_included(self,obj):
+        return "Yes" if obj.cooling_included else "No"
+    def get_Simultaneous_Multithreading(self,obj):
+        return "Yes" if obj.smt else "No" 
+     
   
   
 class VideoCardSerializer(serializers.ModelSerializer):
@@ -275,36 +262,5 @@ class VideoCardSerializer(serializers.ModelSerializer):
     
     class Meta:
        model = VideoCard
-       fields = [
-           'name',
-           'price',
-           'chipset',
-           'memory',
-           'coreClock',
-           'boostClock',
-           'color',
-           'length',
-           'interface',
-           'power_requirement',
-           'compatible_motherboards',
-           'release_year'
-       ]
-        
-    def create(self, validated_data):
-        
-        # الحقول الافتراضية
-        validated_data['population'] = 0
-        validated_data['ammount'] = 0
-
-        forms_names = validated_data.pop('compatible_motherboards', [])
-        #print("finish, value : "+validated_data.get("external_525_bays"))
-        videocard = VideoCard.objects.create(**validated_data )
-        # Retrieve or create items by their names
-        forms = []
-        for name in forms_names:
-            item, _ = motherBoard_Socket.objects.get_or_create(name=name)
-            forms.append(item)
-        
-        videocard.compatible_motherboards.set(forms)
-        videocard.save()
-        return videocard
+       fields = "__all__"
+       

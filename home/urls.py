@@ -3,5 +3,6 @@ from . import api
 
 
 urlpatterns = [
-    path('Parts/',api.PartListView.as_view(),name="Brause Parts"),
+    path('Parts/',api.PartListView.as_view(),name="Browse Parts"),
+    path('Parts/<int:id>',api.PartDetailsView.as_view(),name="Part Details"),
 ]
