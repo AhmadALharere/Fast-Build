@@ -32,8 +32,8 @@ or
 | HTTP Status         | Body                                                                      |
 |---------------------|---------------------------------------------------------------------------|
 | **200 OK**          | `{ "key": "a7ca******..." }`                                              |
-| **400 Bad Request** | `{ "password": ["This field is required."] }`                             |
-| **400 Bad Request** | `{ "non_field_errors": ["Unable to log in with provided credentials."] }` |
+| **400 Bad Request** | `{ "password": ["This Failed is required."] }`                             |
+| **400 Bad Request** | `{ "non_Failed_errors": ["Unable to log in with provided credentials."] }` |
 
 
 
@@ -81,11 +81,11 @@ null
 | **204 No Content**  |                                                                           |
 | **400 Bad Request** | `{"username": ["A user with that username already exists."]}`             |
 | **400 Bad Request** | `{"email": ["Email is already in use."]}`                                 |
-| **400 Bad Request** | `{"non_field_errors": ["The two password fields didn't match."]}`         |
-| **400 Bad Request** | `{"username": ["This field is required."]}`                               |
-| **400 Bad Request** | `{"email": ["This field is required."]}`                                  |
-| **400 Bad Request** | `{"password1": ["This field is required."]}`                              |
-| **400 Bad Request** | `{"password2": ["This field is required."]}`                              |
+| **400 Bad Request** | `{"non_Failed_errors": ["The two password Faileds didn't match."]}`         |
+| **400 Bad Request** | `{"username": ["This Failed is required."]}`                               |
+| **400 Bad Request** | `{"email": ["This Failed is required."]}`                                  |
+| **400 Bad Request** | `{"password1": ["This Failed is required."]}`                              |
+| **400 Bad Request** | `{"password2": ["This Failed is required."]}`                              |
 
 
 ### 4. Change Password
@@ -109,10 +109,10 @@ null
 |---------------------|-------------------------------------------------------------------------------------------|
 | **200 OK**          | `{"detail": "New password has been saved."}`                                              |
 | **400 Bad Request** | `{"old_password": ["Your old password was entered incorrectly. Please enter it again."]}` |
-| **400 Bad Request** | `{"new_password2": ["The two password fields didn’t match."]}`                            |
-| **400 Bad Request** | `{"old_password": ["This field is required."]}`                                           |
-| **400 Bad Request** | `{"new_password1": ["This field is required."]}`                                          |
-| **400 Bad Request** | `{"new_password2": ["This field is required."]}`                                          |
+| **400 Bad Request** | `{"new_password2": ["The two password Faileds didn’t match."]}`                            |
+| **400 Bad Request** | `{"old_password": ["This Failed is required."]}`                                           |
+| **400 Bad Request** | `{"new_password1": ["This Failed is required."]}`                                          |
+| **400 Bad Request** | `{"new_password2": ["This Failed is required."]}`                                          |
 
 
 
@@ -137,7 +137,7 @@ null
 |---------------------|-------------------------------------------------------------------------------------------|
 | **200 OK**          | `{"key": "********..."}`                                                                  |
 | **401 Unauthorized**| `{"detail": "Invalid Google access token."}`                                              |
-| **400 Bad Request** | `{"non_field_errors": ["Incorrect input. access_token or code is required."]}`            |
+| **400 Bad Request** | `{"non_Failed_errors": ["Incorrect input. access_token or code is required."]}`            |
 
 
 
@@ -211,10 +211,10 @@ null
 
 | HTTP Status         | Body                                                                                      |
 |---------------------|-------------------------------------------------------------------------------------------|
-| **200 OK**          | `{"statues": "Field","compitability": "Undefined","massege": "..."}`                      |
-| **200 OK**          | `{"statues": "Success","compitability": "Danger","massege": "..."}`                       |
-| **200 OK**          | `{"statues": "Success","compitability": "Warning","massege": "..."}`                      |
-| **200 OK**          | `{"statues": "Success","compitability": "Success","massege": "..."}`                      |
+| **200 OK**          | `{"status": "Failed","compitability": "Undefined","massege": "..."}`                      |
+| **200 OK**          | `{"status": "Success","compitability": "Danger","massege": "..."}`                       |
+| **200 OK**          | `{"status": "Success","compitability": "Warning","massege": "..."}`                      |
+| **200 OK**          | `{"status": "Success","compitability": "Success","massege": "..."}`                      |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                                            |
 
 
@@ -229,17 +229,17 @@ null
 
 
     -in response message:
-    --"statues":Represent the statues of Cart(normal Cart/PC Collection) and take values:
-        --- "Field": it is normal Cart
+    --"status":Represent the status of Cart(normal Cart/PC Collection) and take values:
+        --- "Failed": it is normal Cart
         --- "Success": it is Pc Collection
     
-    --"compitability":Represent the statues of PC parts compitability and take values:
+    --"compitability":Represent the status of PC parts compitability and take values:
         --- "Undefined": when it did not Represent a Pc Collection
         --- "Success": the parts should work togather
         --- "Warning": there is error in compitability but the collection still working
         --- "Danger": there is a massive error in compitability that would make the collection can not working
 
-    --"massege":Represent a massege text that well be shown to the user to explane the statues for so many conditions
+    --"massege":Represent a massege text that well be shown to the user to explane the status for so many conditions
 
 
 
@@ -264,8 +264,8 @@ null
 
 | HTTP Status         | Body                                                                                      |
 |---------------------|-------------------------------------------------------------------------------------------|
-| **200 OK**          | `{"statues":"failed","message":"..."`                                                     |
-| **200 OK**          | `{"statues": "success","message":"..."`                                                   |
+| **200 OK**          | `{"status":"failed","message":"..."`                                                     |
+| **200 OK**          | `{"status": "success","message":"..."`                                                   |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                                            |
 
 
@@ -280,11 +280,11 @@ null
 
 
     -in response message:
-        --"statues":Represent the statues of the function and take values:
+        --"status":Represent the status of the function and take values:
             --- "failed": there was an error that prevent the server from post the order(as example the user order unvalid discount,shortage of one pieces in storage,or invalid part_id)
             --- "success": your order posted successfully
     
-        --"massege":Represent a massege text that well be shown to the user to explane the statues for so many conditions
+        --"massege":Represent a massege text that well be shown to the user to explane the status for so many conditions
 
 
 
@@ -437,4 +437,153 @@ null
 | **200 OK**          | `<wanted object>`                                                       |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
 
+
+
+## 14. Liked Part List
+
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/home/Like/List`                                                    |
+| **Method**         | `GET`                                                                |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | null                                                                 |
+| **Description**    | `get list of parts that the user marked it`                          | 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                    |
+|---------------------|-------------------------------------------------------------------------|
+| **200 OK**          | `<list of objects>`                                                     |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
+
+
+### notes
+    -objects list is like:
+        [
+            {
+                "part": {
+                    "id": 4,
+                    "name": "zthsy",
+                    "price": 567.0,
+                    "population": 9,
+                    "like_count": 1,
+                    "image_filename": null
+                },
+                "created_at": "2025-05-06T06:04:56.145540Z"
+            },...
+        ]
+
+
+
+## 15. put like
+
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/home/Like/put`                                                     |
+| **Method**         | `POST`                                                               |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | Content-Type                                                         |
+| **Description**    | `add like for current user on wanted part`                           | 
+
+#### Request Body
+
+```json
+{"part":4}
+```
+
+#### Responses
+
+| HTTP Status         | Body                                                                      |
+|---------------------|---------------------------------------------------------------------------|
+| **201 Created**     | `<like object>`                                                           |
+| **400 Bad Request** | `{"non_field_errors": ["The fields user, part must make a unique set."]}` |
+| **400 Bad Request** | `{"part": ["This field is required."]}`                                   |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
+
+
+### notes
+    -like object is like:
+        {"id": 4,"created_at": "2025-05-06T06:04:56.145540Z","part": 4}
+
+    -400 response reffered to that the user already had like on this part
+
+## 16. remove like
+
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/home/Like/remove/<part_id>`                                        |
+| **Method**         | `DELETE`                                                             |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | null                                                                 |
+| **Description**    | `remove like from current user on wanted part`                       | 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                      |
+|---------------------|---------------------------------------------------------------------------|
+| **204 No Content**  |                                                                           |
+| **404 Not Found**   | `{"detail": "you don`t have like in this piece or it isn`t exist"}`       |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
+
+
+## 17. load Notifications
+
+| Property           | Value                                                                                                |
+|--------------------|------------------------------------------------------------------------------------------------------|
+| **URL**            | `/home/Notification/Load`                                                                            |
+| **Method**         | `GET`                                                                                                |
+| **Authentication** | Required                                                                                             |
+| **Content-Type**   | null                                                                                                 |
+| **Description**    | `return list of notifications that related to user or public notification in dated order from newest`| 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                      |
+|---------------------|---------------------------------------------------------------------------|
+| **200 OK**          | `<list of notifications>`                                                 |
+| **400 Bad Request** | `{"non_field_errors": ["The fields user, part must make a unique set."]}` |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
+
+### notes
+    -notifications list well be like:
+        [
+            {
+                "id": 2,
+                "type": "<Public/private>",
+                "message": "test 2",
+                "is_read": false,
+                "created_at": "2025-05-06T05:20:13.801666Z"
+            },...
+        ]
+
+## 18. mark Notifications as readed
+
+| Property           | Value                                                                                                |
+|--------------------|------------------------------------------------------------------------------------------------------|
+| **URL**            | `/home/Notification/Read/<id>`                                                                       |
+| **Method**         | `POST`                                                                                               |
+| **Authentication** | Required                                                                                             |
+| **Content-Type**   | null                                                                                                 |
+| **Description**    | `return list of notifications that related to user or public notification in dated order from newest`| 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                      |
+|---------------------|---------------------------------------------------------------------------|
+| **200 OK**          | `{"status": "Success"}`                                                   |
+| **404 Not Found**   | `{"detail": "Notification not found"}`                                    |
+| **403 Forbidden**   | `{"detail": "you have no permission on this notification"}`               |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 

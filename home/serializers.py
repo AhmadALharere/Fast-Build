@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from PcPart.models import Part
 from PcPart.serializer import CaseSerializer,CaseAccessorySerializer,CaseFanSerializer,CpuCoolerSerializer,CpuSerializer,VideoCardSerializer,MouseSerializer,ExternalHardDriveSerializer,FanControllerSerializer,headphonesSerializer,InternalHardDriveSerializer,KeyboardSerializer,MemorySerializer,MonitorSerializer,MotherBoardSerializer,OpticalDriveSerializer,PowerSupplySerializer,SoundCardSerializer,SpeakersSerializer,WiresNetworkCardSerializer,WirelessNetworkCardSerializer,WebcamSerializer,ThermalPasteSerializer
+from .models import Notification,Like
 
 
 class PartSerializer(serializers.ModelSerializer):
@@ -72,3 +73,29 @@ class PartDetailsSerializer(serializers.ModelSerializer):
             
         except Exception as Ex:
             return None
+        
+
+
+class like_Serializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    class Meta:
+        model=Like
+        fields = "__all__"
+  
+  
+        
+class liked_Part_Serializer(serializers.ModelSerializer):
+    part = PartSerializer()
+    class Meta:
+        model=Like
+        fields = ['part','created_at']
+        
+    
+class Notification_serializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    class Meta:
+        model = Notification
+        exclude = ['user']
+        
+    def get_type(self,obj):
+        return "Private" if obj.user!=None else "Public"

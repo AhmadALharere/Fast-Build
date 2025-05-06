@@ -5,7 +5,7 @@ from PcPart.models import Part
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications",null=True,blank=True)
     message = models.TextField()
     is_read = models.BooleanField(default=False) # حالة الاشعارات
     created_at = models.DateTimeField(auto_now_add=True)
