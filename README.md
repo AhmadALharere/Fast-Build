@@ -550,7 +550,6 @@ null
 | HTTP Status         | Body                                                                      |
 |---------------------|---------------------------------------------------------------------------|
 | **200 OK**          | `<list of notifications>`                                                 |
-| **400 Bad Request** | `{"non_field_errors": ["The fields user, part must make a unique set."]}` |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
 ### notes
@@ -567,13 +566,13 @@ null
 
 ## 18. mark Notifications as readed
 
-| Property           | Value                                                                                                |
-|--------------------|------------------------------------------------------------------------------------------------------|
-| **URL**            | `/home/Notification/Read/<id>`                                                                       |
-| **Method**         | `POST`                                                                                               |
-| **Authentication** | Required                                                                                             |
-| **Content-Type**   | null                                                                                                 |
-| **Description**    | `return list of notifications that related to user or public notification in dated order from newest`| 
+| Property           | Value                            |
+|--------------------|----------------------------------|
+| **URL**            | `/home/Notification/Read/<id>`   |
+| **Method**         | `POST`                           |
+| **Authentication** | Required                         |
+| **Content-Type**   | null                             |
+| **Description**    | `mark a notification as readed`  | 
 
 #### Request Body
 
