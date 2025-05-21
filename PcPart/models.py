@@ -6,8 +6,12 @@ from django.contrib.contenttypes.models import ContentType
 #----------------------------------------------------------------------------------------------------
 
 def imageSaver(instance,filename):
-    name,extention = filename.split('.')
-    return "profile/imgicon/%s.%s"%(instance.id,extention)
+    idx = filename.rfind('.')
+    if idx <= 0:
+         extention = filename[idx:]
+    else:
+        extention = 'jpg'
+    return "PcPart/%s/imgicon/%s.%s"%(instance.content_type.name,instance.id,extention)
 
 
 
@@ -85,7 +89,9 @@ Fan_Size = (
     (200,"200mm"),
     (220,"220mm"),
     (230,"230mm"),
-    (250,"250mm")
+    (240,"240mm"),
+    (250,"250mm"),
+    (280,"280mm"),
 )
 
 Form_Factor_in_Case = (
@@ -314,12 +320,13 @@ power_supply_Modular = (
 )
 
 power_supply_efficiency = (
+    ("Unrated", "Unrated"),
     ("Plus", "Plus"),
     ("Bronze", "Bronze"),
     ("Gold", "Gold"),
     ("Platinum", "Platinum"),
     ("Titanium", "Titanium")
-)# Plus < Bronze < Gold < Platinum < Titanium
+)# Unrated < Plus < Bronze < Gold < Platinum < Titanium
 
 form_factors = (
     ("ATX", "ATX"),
@@ -385,7 +392,7 @@ class Part(models.Model):
     image_filename = models.ImageField(upload_to=imageSaver,null=True,blank=True)
     content_type = models.ForeignKey(ContentType,null=True, on_delete=models.CASCADE, editable=False)
     date_created = models.DateField(auto_now=True)
-    
+    power_requirement = models.FloatField(default=0.0)
     objects = InheritanceManager()
 
     
@@ -394,7 +401,7 @@ class Part(models.Model):
     
     
     def save(self, *args, **kwargs):
-        if not self.content_type_id:
+        if not self.content_type:
             self.content_type = ContentType.objects.get_for_model(self)
         super().save(*args, **kwargs)
 #----------------------------------------------------------------------------------------------------
@@ -406,14 +413,14 @@ class Case(Part):
     color = models.CharField(default="Black", max_length=50)
     side_panel = models.CharField(default="normal", max_length=50)
     #power
-    psu = models.CharField(default="", max_length=50)
+    psu = models.CharField(default="Not Included", max_length=50)
     #motherBoard
     form_factor_support = models.ManyToManyField("Form_Factor")#  Case <---> motherboard
     #cooling
     fan_120mm_support = models.IntegerField(default=0)
     fan_140mm_support = models.IntegerField(default=0)
     cpu_cooler_clearance = models.IntegerField(default=0)#  Case <---> cpu cooler
-    radiator_support = models.ManyToManyField("Radiator_size")# water-c type:120mm , 240mm , 280mm , 360mm , 420mm , +480mm )  
+    radiator_support = models.ManyToManyField("Radiator_size",null=True,blank=True)# water-c type:120mm , 240mm , 280mm , 360mm , 420mm , +480mm )  
     #Video Card
     gpu_clearance = models.IntegerField(default=0)#  Case <---> video card
     #Storage
@@ -442,8 +449,6 @@ class CaseAccessory(Part):
     #case
     compatibility = models.CharField(default="None", max_length=50)
     form_factor = models.CharField(default="5.25", choices=Form_Factor_in_Case , max_length=50)
-    #power
-    power_requirement = models.CharField(default="not requirement", max_length=50) 
     
 
     def __str__(self):
@@ -483,7 +488,7 @@ class CpuCooler(Part):
     color = models.CharField(default="No Color", max_length=50,null=True,blank=True)
     size = models.IntegerField(choices=Fan_Size)
     type = models.CharField(default="Air Cooler", choices=Cpu_Fan_Type , max_length=50)# Air Cooler , Liquid Cooler , Passive  Cooler , Hybrid Cooler , Sub-Ambient Cooler
-    compatibility = models.CharField(default="", max_length=200)
+    compatibility = models.ManyToManyField("motherBoard_Socket")
     cooler_height = models.FloatField(default=0)
     features = models.TextField(default="")
     #statues info
@@ -510,8 +515,6 @@ class Cpu(Part):
     core_count = models.IntegerField(default=0)
     core_clock = models.DecimalField( max_digits=4, decimal_places=2)
     boost_clock = models.DecimalField( max_digits=4, decimal_places=2)
-    #power
-    tdp = models.IntegerField(default=0)
     #Memory
     max_memory_support = models.IntegerField(default=2)
     #cooling
@@ -624,7 +627,7 @@ class Memory(Part):
     
     #general
 #    category = models.CharField(default="Memory",choices=(("Memory","Memory")), max_length=10)
-    generation = models.IntegerField(default=0)
+    generation = models.CharField(default='DDR3',choices=ddr_versions, max_length=10)
     speed = models.IntegerField(default=0)
     pricePerGB = models.DecimalField(max_digits=7, decimal_places=5)
     color = models.CharField(default="no color", max_length=50)
@@ -685,7 +688,7 @@ class MotherBoard(Part):
     memory_channels = models.CharField(default="Single Channel" , choices=memory_channels_list , max_length=50)
     max_capacity_per_slot = models.IntegerField(default=0)
     #storage
-    m2_slut = models.IntegerField(default=0)
+    m2_slot = models.IntegerField(default=0)
     sata_ports = models.IntegerField(default=0)
     #USBs
     usb_2 = models.SmallIntegerField(default=0)
@@ -702,12 +705,7 @@ class MotherBoard(Part):
     fan_headers = models.SmallIntegerField(default=0)
     aio_support = models.BooleanField()
     #extansion_capabilities
-    pci_slots = models.SmallIntegerField(default=0)
-    pcie_x1_slots = models.SmallIntegerField(default=0)
-    pcie_x2_slots = models.SmallIntegerField(default=0)
-    pcie_x4_slots = models.SmallIntegerField(default=0)
-    pcie_x8_slots = models.SmallIntegerField(default=0)
-    pcie_x16_slots = models.SmallIntegerField(default=0)
+    pcie_slots = models.SmallIntegerField(default=0)
     #extra
     rgb_support = models.BooleanField()
     release_year = models.SmallIntegerField(default=0)
@@ -831,8 +829,8 @@ class VideoCard(Part):
     boostClock = models.FloatField(default=0,null=True,blank=True)
     color =  models.CharField(default="no color", max_length=50)
     length = models.IntegerField(default=0)
+    compatible_motherboard = models.ManyToManyField("motherBoard_Socket")
     interface = models.CharField(default="PCIe 4.0", choices=Extention_Cards_interface , max_length=50)# PCI , PCIe 1.0  , PCIe 4.0 , PCIe 8.0 , PCIe 16.0
-    power_requirement = models.IntegerField(default=0)
     release_year = models.IntegerField(default=0,null=True,blank=True)
     
     

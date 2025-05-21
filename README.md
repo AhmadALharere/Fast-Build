@@ -211,10 +211,10 @@ null
 
 | HTTP Status         | Body                                                                                      |
 |---------------------|-------------------------------------------------------------------------------------------|
-| **200 OK**          | `{"status": "Failed","compitability": "Undefined","massege": "..."}`                      |
-| **200 OK**          | `{"status": "Success","compitability": "Danger","massege": "..."}`                       |
-| **200 OK**          | `{"status": "Success","compitability": "Warning","massege": "..."}`                      |
-| **200 OK**          | `{"status": "Success","compitability": "Success","massege": "..."}`                      |
+| **200 OK**          | `{"status": "Failed","compitability": "Undefined","message": "..."}`                      |
+| **200 OK**          | `{"status": "Success","compitability": "Danger","message": "..."}`                       |
+| **200 OK**          | `{"status": "Success","compitability": "Warning","message": "..."}`                      |
+| **200 OK**          | `{"status": "Success","compitability": "Success","message": "..."}`                      |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                                            |
 
 
@@ -239,7 +239,7 @@ null
         --- "Warning": there is error in compitability but the collection still working
         --- "Danger": there is a massive error in compitability that would make the collection can not working
 
-    --"massege":Represent a massege text that well be shown to the user to explane the status for so many conditions
+    --"message":Represent a message text that well be shown to the user to explane the status for so many conditions
 
 
 
@@ -284,7 +284,7 @@ null
             --- "failed": there was an error that prevent the server from post the order(as example the user order unvalid discount,shortage of one pieces in storage,or invalid part_id)
             --- "success": your order posted successfully
     
-        --"massege":Represent a massege text that well be shown to the user to explane the status for so many conditions
+        --"message":Represent a message text that well be shown to the user to explane the status for so many conditions
 
 
 
@@ -586,3 +586,69 @@ null
 | **403 Forbidden**   | `{"detail": "you have no permission on this notification"}`               |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
+
+## 19. Build PC
+
+| Property           | Value                                                                     |
+|--------------------|---------------------------------------------------------------------------|
+| **URL**            | `/Build/build_pc/`                                                        |
+| **Method**         | `POST`                                                                    |
+| **Authentication** | Required                                                                  |
+| **Content-Type**   | `application.json`                                                        |
+| **Description**    | `api to help user building a bc depended on user budget and pc category`  | 
+
+#### Request Body
+
+```json
+{
+"budget":1200,
+"pc_type":"Gaming",
+"ordered_part":"powersupply",
+"partList":[97,9,45,54,105,105,83,17,31]
+}
+```
+
+#### Responses
+
+| HTTP Status         | Body                                                                      |
+|---------------------|---------------------------------------------------------------------------|
+| **200 OK**          | `{"status": "<...>","query": [<part>,...],...`                            |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
+| **400 Bad Request** | `{"message":"error in part id list"}`                                     |
+| **400 Bad Request** | `{"status": "failed","message":"some main parameters are missing,make sure to send all required parameters in json row body"}`                                     |
+
+
+### notes
+
+    -in request body:
+        -budget: integer number represent user budget in dollar ($)
+        -pc_type: take values: Gaming , Developer , Video Editing , Office
+        -ordered_part: take values (prefer to pe in sort): motherboard , case , cpu , videocard , memory , internalharddrive , cpufan , casefan , powersupply
+        - partList: is a list of  selected part id 
+
+
+    -in 200 response the reterned data sa json is:
+    |  key                  |   description                           |   Values                                                         |
+    |-----------------------|-----------------------------------------|------------------------------------------------------------------|    
+    | status                | the status of request                   | success , failed                                                 |    
+    | query                 | filtered part from wanted part category | [{"id":<int>,"name": "<name of piece>","price": <float>,"population":<int>,"like_count":<int>,"image_filename":"<image path in server>"},...]                                                                |    
+    | PC_class              | PC class depending on budget            | class A (recommended) , class B (requirement) , class C (weak)   |    
+    | total_cost            | total cost of selected part             | float positive number                                            |
+    | collection validation | is it a valid PC?                       | boolean value                                                    |
+    | compatibility_status  | is all part compatible?                 | boolean value                                                    |
+    | message               | report explain compatibility status     | string                                                           |
+    | part_limit            | json data explane every type limit      | in next note                                                     |
+
+
+    -'part_limit' values:
+    | ordered_part value     | returned json                                        |
+    |------------------------|------------------------------------------------------|
+    | motherboard            | {'piece':1}                                          |
+    | case                   | {'piece':1}                                          |
+    | cpu                    | {'piece':1}                                          |
+    | videocard              | {'piece':<integer>}                                  |
+    | memory                 | {'piece':<integer>}                                  |
+    | internalharddrive      | {'SATA':<integer>,'MVMe':<integer>,'m.2':<integer>}  |
+    | cpufan                 | {'piece':1}                                          |
+    | casefan                | {'fan_120mm':<integer>,'fan_140mm':<integer>}        |
+    | powersupply            | {'piece':<0-1>}                                      |

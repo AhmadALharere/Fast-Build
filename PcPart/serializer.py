@@ -113,8 +113,7 @@ class MouseSerializer(serializers.ModelSerializer):
       
       
 class MotherBoardSerializer(serializers.ModelSerializer):
-        
-        
+         
     class Meta:
             
         model= MotherBoard
@@ -239,17 +238,14 @@ class CpuCoolerSerializer(serializers.ModelSerializer):
   
 class CpuSerializer(serializers.ModelSerializer):
     socket = serializers.StringRelatedField()
-    tdp = serializers.SerializerMethodField()
     cooling_included = serializers.SerializerMethodField()
     Simultaneous_Multithreading = serializers.SerializerMethodField()
     
     
     class Meta:
        model = Cpu
-       fields =  ['release_year','socket','core_count','core_clock','boost_clock','tdp','max_memory_support','cooling_included','graphics','Simultaneous_Multithreading']
+       fields =  ['release_year','socket','core_count','core_clock','boost_clock','max_memory_support','cooling_included','graphics','Simultaneous_Multithreading']
        
-    def get_tdp(self,obj):
-        return f"{obj.tdp} W"
     def get_cooling_included(self,obj):
         return "Yes" if obj.cooling_included else "No"
     def get_Simultaneous_Multithreading(self,obj):

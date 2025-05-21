@@ -17,28 +17,29 @@ class PartDetailsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=Part
-        fields = ['id','name','price','population','like_count','image_filename','details']
+        fields = ['id','name','price','population','like_count','power_requirement','image_filename','details']
         
     def get_details(self,obj):
         try:
-            value = obj.content_type.model.lower()
+            print(obj.content_type.name.lower())
+            value = obj.content_type.name.lower()
             if value=='case':
                 return CaseSerializer(obj).data
-            elif value=='caseaccessory':
+            elif value=='case accessory':
                 return CaseAccessorySerializer(obj).data
-            elif value=='casefan':
+            elif value=='case fan':
                 return CaseFanSerializer(obj).data
-            elif value=='cpucooler':
+            elif value=='cpu cooler':
                 return CpuCoolerSerializer(obj).data
             elif value=='cpu':
                 return CpuSerializer(obj).data
-            elif value=='externalharddrive':
+            elif value=='external hard drive':
                 return ExternalHardDriveSerializer(obj).data
-            elif value=='fancontroller':
+            elif value=='fan controller':
                 return FanControllerSerializer(obj).data
             elif value=='headphones':
                 return headphonesSerializer(obj).data
-            elif value=='internalharddrive':
+            elif value=='internal hard drive':
                 return InternalHardDriveSerializer(obj).data
             elif value=='keyboard':
                 return KeyboardSerializer(obj).data
@@ -46,27 +47,27 @@ class PartDetailsSerializer(serializers.ModelSerializer):
                 return MemorySerializer(obj).data
             elif value=='monitor':
                 return MonitorSerializer(obj).data
-            elif value=='motherBoard':
+            elif value=='mother board':
                 return MotherBoardSerializer(obj).data
             elif value=='mouse':
                 return MouseSerializer(obj).data
-            elif value=='opticaldrive':
+            elif value=='optical drive':
                 return OpticalDriveSerializer(obj).data
-            elif value=='powersupply':
+            elif value=='power supply':
                 return PowerSupplySerializer(obj).data
-            elif value=='soundcard':
+            elif value=='sound card':
                 return SoundCardSerializer(obj).data
             elif value=='speakers':
                 return SpeakersSerializer(obj).data
-            elif value=='ThermalPaste':
+            elif value=='thermal paste':
                 return ThermalPasteSerializer(obj).data
-            elif value=='videocard':
+            elif value=='video card':
                 return VideoCardSerializer(obj).data
             elif value=='webcam':
                 return WebcamSerializer(obj).data
-            elif value=='wiresnetworkcard':
+            elif value=='wires network card':
                 return WiresNetworkCardSerializer(obj).data
-            elif value=='wirelessnetworkcard':
+            elif value=='wireless network card':
                 return WirelessNetworkCardSerializer(obj).data
             else:
                 return None

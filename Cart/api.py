@@ -12,23 +12,23 @@ from .models import order,ShopBasket,Discount
 from .serializer import Cart_Serializer,BasketSerializer
 from datetime import date
 
-def compitability_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
+def compatibility_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
     return (MotherBoard.form_Factor in Case.form_factor_support)
 
-def compitability_Case_CaseFan(Case,CaseFans):#Warning if it Flase
+def compatibility_Case_CaseFan(Case,CaseFans):#Warning if it Flase
     fans_with_size={'120':0,'140':0}
     for fan in CaseFans:
         fans_with_size[fan.size]+=1
     return True if Case.fan_120mm_support >= fans_with_size['120'] and Case.fan_140mm_support >= fans_with_size['120'] else False
 
-def compitability_Case_CPUCooler(Case,CPUCooler):#danger if it Flase
+def compatibility_Case_CPUCooler(Case,CPUCooler):#danger if it Flase
     if CPUCooler.type == 'Liquid Cooler':
 
         return True if Case.radiator_support == CPUCooler.size else False        
     
     return True if Case.cpu_cooler_clearance == CPUCooler.size else False
 
-def compitability_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it Flase
+def compatibility_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it Flase
     IHD_with_size=[0,0]#3.5,2.5
     for hard_drive in InternalHardDrive:
         if hard_drive.type == "HDD SATA" or hard_drive.type == "HDD SAS":
@@ -37,25 +37,25 @@ def compitability_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it 
             IHD_with_size[1]+=1
     return True if Case.socket3_5 >= IHD_with_size[0] and Case.socket2_5 >= IHD_with_size[1] else False
 
-def compitability_Case_OpticalDrive(Case,OpticalDrive):#Warning if it Flase
+def compatibility_Case_OpticalDrive(Case,OpticalDrive):#Warning if it Flase
     return True if Case.socket5_25 >= len(OpticalDrive) else False
 
-def compitability_Case_PowerSupply(Case,PowerSupply):#Danger if it Flase
+def compatibility_Case_PowerSupply(Case,PowerSupply):#Danger if it Flase
     if Case.psu =="Not Included":#Not Included
         for formID in Case.form_factor_support:
             if Form_Factor.objects.get(pk=formID).name in power_supply_and_cases[PowerSupply.type]:
                 return True
     return False
 
-def compitability_Case_VideoCard(Case,VideoCard):#Danger if it Flase
+def compatibility_Case_VideoCard(Case,VideoCard):#Danger if it Flase
     return True if VideoCard.length <= Case.gpu_clearance else False
 
-def compitability_CaseFan(CaseFans,MotherBoard,FanController):#Warning if it Flase
+def compatibility_CaseFan(CaseFans,MotherBoard,FanController):#Warning if it Flase
     if FanController:
         return True if CaseFans.__len__()<=FanController.channels else False
     return True if CaseFans.__len__()<=MotherBoard.fan_headers else False
 
-def compitability_MotherBoard_CPU(MotherBoard,CPU):#Danger if it Flase
+def compatibility_MotherBoard_CPU(MotherBoard,CPU):#Danger if it Flase
     return True if MotherBoard.socket==CPU.socket else False
 
 def get_motherboard_ddr_ver(str):
@@ -65,7 +65,7 @@ def get_motherboard_ddr_ver(str):
     elif str in ["DDR4","DDR4L","LPDDR4","LPDDR4X"] : return 4
     else: return 5
 
-def compitability_MotherBoard_Memory(MotherBoard,Memorys):#Danger if it Flase
+def compatibility_MotherBoard_Memory(MotherBoard,Memorys):#Danger if it Flase
     if MotherBoard.memory_Slots>=Memorys.__len__():
         full_capacity = 0
         Max_Capacity = Memorys[1].total_capacity
@@ -93,12 +93,12 @@ def compitability_MotherBoard_Memory(MotherBoard,Memorys):#Danger if it Flase
                                 return True
         return False
         
-def compitability_MotherBoard_CPUCooler(MotherBoard,CPUCooler):#Danger if it Flase
+def compatibility_MotherBoard_CPUCooler(MotherBoard,CPUCooler):#Danger if it Flase
     if CPUCooler.type == "Liquid Cooler":
         return MotherBoard.aio_support
     return True
 
-def compitability_MotherBoard_InternalHardDrives(MotherBoard,InternalHardDrives):#Warning if it Flase
+def compatibility_MotherBoard_InternalHardDrives(MotherBoard,InternalHardDrives):#Warning if it Flase
     hard_count=[0,0]#sata/m2
     for hardDrive in InternalHardDrives:
         if hardDrive.type=="SSD M.2":
@@ -107,7 +107,7 @@ def compitability_MotherBoard_InternalHardDrives(MotherBoard,InternalHardDrives)
             hard_count[1]+=1
     return True if MotherBoard.m2_slut>=hard_count[2] and MotherBoard.sata_ports>=hard_count[1] else False
 
-def compitability_MotherBoard_Extention_Cards(MotherBoard,SoundCard,VideoCard,WiresNetworkCard,WirelessNetworkCard):#Warning if it false
+def compatibility_MotherBoard_Extension_Cards(MotherBoard,SoundCard,VideoCard,WiresNetworkCard,WirelessNetworkCard):#Warning if it false
         EC_counters = [0,0,0,0,0]
         for card in SoundCard:
             if card.interface == "PCIe x1":
@@ -159,10 +159,10 @@ def compitability_MotherBoard_Extention_Cards(MotherBoard,SoundCard,VideoCard,Wi
             
         return True if MotherBoard.pcie_x1_slots<=EC_counters[1] and MotherBoard.pcie_x2_slots<=EC_counters[2] and MotherBoard.pcie_x4_slots<=EC_counters[3] and MotherBoard.pcie_x8_slots<=EC_counters[4] and MotherBoard.pcie_x16_slots<=EC_counters[5] else False
     
-def compitability_CPU_Cooling(CPU):#Warning if it false
+def compatibility_CPU_Cooling(CPU):#Warning if it false
         return not(CPU.cooling_included)
     
-def compitability_CPU_Memory(CPU,Memorys):#Danger if it false
+def compatibility_CPU_Memory(CPU,Memorys):#Danger if it false
         return CPU.max_memory_support>=Memorys.__len__()
 
 
@@ -237,14 +237,14 @@ def is_collection_valid(request):
                     
         except Exception as Ex:
                 print(f'Exciption:{Ex}/nAPI: Is_collection_Valid/ndata:{data}')
-                return JsonResponse({'status':'Failed','compitability':'Undefined','massege':'Exception has been detecated'})
+                return JsonResponse({'status':'Failed','compatibility':'Undefined','message':'Exception has been detecated'})
         for keys in ['Case',
                     'Cpu',
                     'CPUCooler',
                     'MotherBoart',
                     'PowerSupply']:
             if len(part_sorter[keys])!= 1:
-                return JsonResponse({'status':'Failed','compitability':'Undefined','massege':f'this cart is not represent a PC collection because there is {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick just one of {keys} kategory'})
+                return JsonResponse({'status':'Failed','compatibility':'Undefined','message':f'this cart is not represent a PC collection because there is {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick just one of {keys} kategory'})
             
         for keys in ['CaseFan',
                     'InternalHardDrive',
@@ -252,55 +252,55 @@ def is_collection_valid(request):
                     ]:
 
             if len(part_sorter[keys]) < 1:
-                return JsonResponse({'status':'Failed','compitability':'Undefined','massege':f'this cart is not represent a PC collection because there is NO {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
+                return JsonResponse({'status':'Failed','compatibility':'Undefined','message':f'this cart is not represent a PC collection because there is NO {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
 
-        if not compitability_MotherBoard_CPU(part_sorter['MotherBoard'],part_sorter['CPU']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the MotherBoard and CPU isnot compitable'})
+        if not compatibility_MotherBoard_CPU(part_sorter['MotherBoard'],part_sorter['CPU']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the MotherBoard and CPU isnot compitable'})
 
-        if not compitability_MotherBoard_Memory(part_sorter['MotherBoard'],part_sorter['Memory']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the MotherBoard can`t be compitable with all selected Memorys'})
+        if not compatibility_MotherBoard_Memory(part_sorter['MotherBoard'],part_sorter['Memory']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the MotherBoard can`t be compitable with all selected Memorys'})
 
-        if not compitability_Case_MotherBoard(part_sorter['Case'],part_sorter['MotherBoard']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the Case cannot contain MotherBoard'})
+        if not compatibility_Case_MotherBoard(part_sorter['Case'],part_sorter['MotherBoard']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case cannot contain MotherBoard'})
 
-        if not compitability_Case_PowerSupply(part_sorter['Case'],part_sorter['PowerSupply']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the Case cannot contain PowerSupply or it has already one i it'})
+        if not compatibility_Case_PowerSupply(part_sorter['Case'],part_sorter['PowerSupply']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case cannot contain PowerSupply or it has already one i it'})
 
-        if not compitability_MotherBoard_CPUCooler(part_sorter['MotherBoard'],part_sorter['CPUCooler']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the MotherBoard is not supported Lequid Cooler'})
+        if not compatibility_MotherBoard_CPUCooler(part_sorter['MotherBoard'],part_sorter['CPUCooler']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the MotherBoard is not supported Lequid Cooler'})
 
-        if not compitability_Case_VideoCard(part_sorter['Case'],part_sorter['VideoCard']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the Case maybe cannot contain GPU Card'})
+        if not compatibility_Case_VideoCard(part_sorter['Case'],part_sorter['VideoCard']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case maybe cannot contain GPU Card'})
 
-        if not compitability_Case_CPUCooler(part_sorter['Case'],part_sorter['CPUCooler']):
-            return JsonResponse({'status':'Success','compitability':'Danger','massege':'the Case maybe cannot contain CPU Cooler'})
+        if not compatibility_Case_CPUCooler(part_sorter['Case'],part_sorter['CPUCooler']):
+            return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case maybe cannot contain CPU Cooler'})
             
-        if not compitability_MotherBoard_Extention_Cards(part_sorter['MotherBoard'],part_sorter['SoundCard'],part_sorter['VideoCard'],part_sorter['WiresNetworkCard'],part_sorter['WirelessNetworkCard']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'the MotherBoard don`t have enough or suitable sluts to import all Extintial Cards'})
+        if not compatibility_MotherBoard_Extension_Cards(part_sorter['MotherBoard'],part_sorter['SoundCard'],part_sorter['VideoCard'],part_sorter['WiresNetworkCard'],part_sorter['WirelessNetworkCard']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'the MotherBoard don`t have enough or suitable sluts to import all Extintial Cards'})
             
-        if not compitability_MotherBoard_InternalHardDrives(part_sorter['MotherBoard'],part_sorter['InternalHardDrive']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'the MotherBoard don`t have enough or suitable sluts to import all Hard Drives'})
+        if not compatibility_MotherBoard_InternalHardDrives(part_sorter['MotherBoard'],part_sorter['InternalHardDrive']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'the MotherBoard don`t have enough or suitable sluts to import all Hard Drives'})
 
-        if not compitability_Case_InternalHardDrive(part_sorter['Case'],part_sorter['InternalHardDrive']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'the Case maybe cannot contain all Hard-Drives'})
+        if not compatibility_Case_InternalHardDrive(part_sorter['Case'],part_sorter['InternalHardDrive']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'the Case maybe cannot contain all Hard-Drives'})
 
-        if not compitability_Case_OpticalDrive(part_sorter['Case'],part_sorter['OpticalDrive']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'the Case maybe cannot contain all OpticalDrive'})
+        if not compatibility_Case_OpticalDrive(part_sorter['Case'],part_sorter['OpticalDrive']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'the Case maybe cannot contain all OpticalDrive'})
 
-        if not compitability_Case_CaseFan(part_sorter['Case'],part_sorter['CaseFan']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'the Case maybe cannot contain all Fans'})
+        if not compatibility_Case_CaseFan(part_sorter['Case'],part_sorter['CaseFan']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'the Case maybe cannot contain all Fans'})
 
-        if not compitability_CaseFan(part_sorter['CaseFan'],part_sorter['MotherBoard'],part_sorter['FanController']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'there is no enough channels to connect all Fans'})
+        if not compatibility_CaseFan(part_sorter['CaseFan'],part_sorter['MotherBoard'],part_sorter['FanController']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'there is no enough channels to connect all Fans'})
 
-        if not compitability_CPU_Memory(part_sorter['CPU'],part_sorter['Memory']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'The CPU cannot deal with all this memory'})
+        if not compatibility_CPU_Memory(part_sorter['CPU'],part_sorter['Memory']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'The CPU cannot deal with all this memory'})
 
-        if not compitability_CPU_Cooling(part_sorter['CPU']):
-            return JsonResponse({'status':'Success','compitability':'Warning','massege':'The CPU has already cooler with it'})
+        if not compatibility_CPU_Cooling(part_sorter['CPU']):
+            return JsonResponse({'status':'Success','compatibility':'Warning','message':'The CPU has already cooler with it'})
 
 
-        return JsonResponse({'status':'Success','compitability':'Success','massege':'The part that you had selected must be fit togather'})
+        return JsonResponse({'status':'Success','compatibility':'Success','message':'The part that you had selected must be fit togather'})
 
 
 
