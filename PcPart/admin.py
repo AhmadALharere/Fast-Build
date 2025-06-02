@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard 
+from .models import Case,CaseFan ,motherBoard_Socket, CaseAccessory, Cpu, CpuCooler, ExternalHardDrive, FanController, Form_Factor, headphones, InternalHardDrive, Keyboard, Memory, Monitor, Mouse, MotherBoard, OpticalDrive, PowerSupply, SoundCard, Speakers,ThermalPaste , VideoCard ,Webcam, WirelessNetworkCard,WiresNetworkCard,Memory_Frequencies
 from .models import Radiator_size
 from django.contrib.contenttypes.models import ContentType
 # Register your models here.
@@ -53,4 +53,4 @@ admin.site.register(WirelessNetworkCard)
 admin.site.register(WiresNetworkCard)
 admin.site.register(Radiator_size)
 admin.site.register(ContentType)
-
+admin.site.register(Memory_Frequencies)

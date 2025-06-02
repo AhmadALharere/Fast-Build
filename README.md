@@ -635,7 +635,7 @@ null
     | PC_class              | PC class depending on budget            | class A (recommended) , class B (requirement) , class C (weak)   |    
     | total_cost            | total cost of selected part             | float positive number                                            |
     | collection validation | is it a valid PC?                       | boolean value                                                    |
-    | compatibility_status  | is all part compatible?                 | boolean value                                                    |
+    | compatibility_status  | is all part compatible?                 | ['Undefined','Danger','Warning','Success']                       |
     | message               | report explain compatibility status     | string                                                           |
     | part_limit            | json data explane every type limit      | in next note                                                     |
 
@@ -649,6 +649,6 @@ null
     | videocard              | {'piece':<integer>}                                  |
     | memory                 | {'piece':<integer>}                                  |
     | internalharddrive      | {'SATA':<integer>,'MVMe':<integer>,'m.2':<integer>}  |
-    | cpufan                 | {'piece':1}                                          |
+    | cpuciiler              | {'piece':1}                                          |
     | casefan                | {'fan_120mm':<integer>,'fan_140mm':<integer>}        |
     | powersupply            | {'piece':<0-1>}                                      |

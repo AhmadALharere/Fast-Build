@@ -375,7 +375,7 @@ class PC_Chooser():
                 self.part_budget[key]=self.budget * rate
             
 # motherboard > case > cpu > gpu > ram > hard > cpufan > casefan > power supply
-    
+  
 def get_filtered_queryset(chooser,ordered_part):
     limit = {'piece':1}
     print(f"free budget: {chooser.free_budget} , section budget: {chooser.part_budget[ordered_part]} , total: {chooser.part_budget[ordered_part]+chooser.free_budget}")
@@ -392,7 +392,7 @@ def get_filtered_queryset(chooser,ordered_part):
         case_con = Q(length__lte=chooser.PC.part_sorter['case'][0].gpu_clearance)
         return VideoCard.objects.filter(price_filter & motherboard_con & case_con).order_by('-population'),limit
     elif ordered_part=='memory':
-        limit['piece'] = chooser.PC.part_sorter['motherboard'][0].pcie_slots
+        limit['piece'] = chooser.PC.part_sorter['motherboard'][0].memory_Slots
         cpu_con = Q(total_capacity__lte = chooser.PC.part_sorter['cpu'][0].max_memory_support)
         motherboard_con_1 = Q(generation = chooser.PC.part_sorter['motherboard'][0].supported_ddr_version)
         motherboard_con_2 = Q(total_capacity__lte = chooser.PC.part_sorter['motherboard'][0].max_capacity_per_slot)
@@ -403,7 +403,7 @@ def get_filtered_queryset(chooser,ordered_part):
             limit = {'SATA':chooser.PC.part_sorter['motherboard'][0].sata_ports,'MVMe':chooser.PC.part_sorter['motherboard'][0].pcie_slots - len(chooser.PC.part_sorter['videocard']),'m.2':chooser.PC.part_sorter['motherboard'][0].m2_slot}
             return InternalHardDrive.objects.filter(price_filter).order_by('-population'),limit
         else:
-            no_m2_con = Q(type !='SSD M.2')
+            no_m2_con = ~Q(type ='SSD M.2')
             return InternalHardDrive.objects.filter(price_filter & no_m2_con).order_by('-population'),limit
     
     elif ordered_part=='cpucooler':

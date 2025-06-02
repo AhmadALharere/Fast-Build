@@ -1,6 +1,7 @@
 from django.db import models
 from model_utils.managers import InheritanceManager
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 # Create your models here.
 #app name: PcPart
 #----------------------------------------------------------------------------------------------------
@@ -376,7 +377,200 @@ class motherBoard_Socket(models.Model):
     def __str__(self):
         return self.name
     
+#----------------------------------------------------------------------------------------------------
 
+class Memory_Frequencies(models.Model):
+    value = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.value} Hz"
+    
+#----------------------------------------------------------------------------------------------------
+
+class PartManager(InheritanceManager):
+    def get_compatible(self,price=None,parts = None):
+        if not price and not parts:
+            return self.all()
+        conditions = []
+        conditions.append(Q(price__lte=price))
+        part_class = self.model.__name__.lower()
+        if not parts or not isinstance(parts,dict):
+            return self.filter(*conditions)
+        try:
+            if part_class=="case":
+                if "case" in parts:
+                    if len(parts['case'])>0:
+                        return self.none()
+                if "motherboard" in parts:
+                    conditions.append(Q(form_factor_support = parts["motherboard"][0].form_Factor))
+                if "casefan" in parts:
+                    fans_with_size={'120':0,'140':0}
+                    for fan in parts["casefan"]:
+                        fans_with_size[str(fan.size)]+=1
+                        if str(fan.size)=='140':
+                            fans_with_size["120"]+=1
+                    conditions.append(Q(fan_120mm_support__gte=fans_with_size["120"]))
+                    conditions.append(Q(fan_140mm_support__gte=fans_with_size["140"]))
+                if "cpucooler" in parts:
+                    if parts["cpucooler"][0].type == 'Liquid Cooler':
+                        conditions.append(Q(radiator_support = parts["cpucooler"][0].size))
+                    else:
+                        conditions.append(Q(cpu_cooler_clearance__gte=parts["cpucooler"][0].size))
+                if "internalharddrive" in parts:
+                    IHD_with_size=[0,0]#3.5,2.5
+                    for hard_drive in parts["internalharddrive"]:
+                        if hard_drive.type == "HDD SATA" or hard_drive.type == "HDD SAS":
+                            IHD_with_size[0]+=1
+                        else:
+                            IHD_with_size[1]+=1
+                    conditions.append(Q(socket3_5__gte=IHD_with_size[0]))
+                    conditions.append(Q(socket2_5__gte=IHD_with_size[1]))
+                if "opticaldrive" in parts:
+                    conditions.append(Q(socket5_25__gte=len(parts["opticaldrive"])))
+                if "powersupply" in parts:
+                    if len(parts["powersupply"])!=0:
+                        conditions.append(Q(type__in=case_types[parts["powersupply"][0].type]))
+                if "videocard" in parts:
+                    max_length_video_card = 0
+                    for gpu in parts["videocard"]:
+                        if gpu.length > max_length_video_card:
+                            max_length_video_card=gpu.length
+                        conditions.append(Q(gpu_clearance__gte=max_length_video_card))    
+            elif part_class=="casefan":
+                if "case" in parts:
+                    if len(parts["case"])>0:
+                        if parts["case"][0].fan_140mm_support <1:
+                            conditions.append(~Q(size=140))
+            elif part_class=="cpucooler":
+                if "case" in parts:
+                    case_con_1 = Q(size = parts['case'][0].radiator_support)
+                    case_con_2 = Q(cooler_height__lte = parts['case'][0].cpu_cooler_clearance)
+                    liquid_con = Q(type='Liquid Cooler')
+                    conditions.append(Q((case_con_1 & liquid_con) | (case_con_2 & ~liquid_con)))
+                if "motherboard" in parts:
+                    conditions.append(Q(compatibility=parts["motherboard"][0].socket))
+                    if not parts["motherboard"][0].aio_support:
+                        conditions.append(~Q(type='Liquid Cooler'))
+                elif "cpu" in parts:
+                    conditions.append(Q(compatibility=parts["cpu"][0].socket))
+            elif part_class=="cpu":
+                if "motherboard" in parts:
+                    if len(parts["motherboard"])>0:
+                        conditions.append(Q(socket=parts["motherboard"][0].socket))
+            elif part_class=="internalharddrive":
+                if 'motherboard' in parts:
+                    if len(parts["motherboard"])>0:
+                        if parts["motherboard"][0].m2_slot > 0:
+                            conditions.append(~Q(type ='SSD M.2'))
+            elif part_class=="memory":
+                if "motherboard" in parts:
+                    if len(parts["motherboard"])>0:
+                        conditions.append(Q(total_capacity__lte=parts["motherboard"][0].max_capacity_per_slot))
+                        conditions.append(Q(generation=parts["motherboard"][0].supported_ddr_version))
+                if "cpu" in parts:
+                    if len(parts["cpu"])>0:
+                        conditions.append(Q(total_capacity__lte=parts["cpu"][0].max_memory_support))
+            elif part_class=="motherboard":
+                pcie_count = 0
+                if "case" in parts:
+                    if parts["case"]>0:
+                        conditions.append(Q(form_Factor__in=parts["case"][0].form_factor_support.all()))
+                is_socket_selected = False
+                if "cpu" in parts:
+                    if len(parts["cpu"])>0:
+                        conditions.append(Q(socket=parts["cpu"][0].socket))
+                        is_socket_selected = True
+                elif "videocard" in parts:
+                    if len(parts["videocard"])>0:
+                        pcie_count+=len(parts["videocard"])
+                        supported_socket = parts["videocard"][0].compatible_motherboard.all()
+                        for gpu in parts["videocard"]:
+                            supported_socket = [item1 for item1 in supported_socket if item1 in gpu.compatible_motherboard.all()]
+                        conditions.append(Q(socket__in=supported_socket))
+                        is_socket_selected=True
+                if "memory" in parts:
+                    if len(parts["memory"])>0:
+                        total_capacity = 0
+                        max_capacity = 0
+                        memory_sorter = {}
+                        ddr_ver = parts["memory"][0].generation
+                        is_the_same_ddr_ver = True
+                        for ram in parts["memory"]:
+                            total_capacity+=ram.total_capacity
+                            max_capacity = ram.total_capacity if ram.total_capacity > max_capacity else max_capacity
+                            if str(ram.id) in memory_sorter:
+                                memory_sorter[str(ram.id)]+=1
+                            else:
+                                memory_sorter[str(ram.id)]=1
+                            is_the_same_ddr_ver = (ddr_ver==ram.generation)
+                            
+                        if not is_the_same_ddr_ver:
+                            return self.none()
+                        #conditions.append()
+                        conditions.append(Q(supported_ddr_version=ddr_ver))
+                        conditions.append(Q(max_Memory__gte=total_capacity))
+                        conditions.append(Q(max_capacity_per_slot__gte=max_capacity))
+                        daul_num = 0
+                        quad_num = 0
+                        for key in memory_sorter.keys():
+                            daul_num +=memory_sorter[key]/2 + 1 if memory_sorter[key]%2 > 0 else memory_sorter[key]/2
+                            quad_num +=memory_sorter[key]/4 + 1 if memory_sorter[key]%4 > 0 else memory_sorter[key]/4  
+                        
+                        single_channel_cond = Q(Q(memory_channels="Single Channel") & Q(memory_Slots__gte=len(parts["memory"])))
+                        daul_channel_cond = Q(Q(memory_channels="Dual Channel") & Q(memory_Slots__gte=daul_num*2))
+                        quad_channel_cond = Q(Q(memory_channels="Quad Channel") & Q(memory_Slots__gte=daul_num*4))
+                        conditions.append(Q(single_channel_cond | daul_channel_cond | quad_channel_cond))                     
+                if "cpucooler" in parts:
+                    if len(parts["cpucooler"])>0:
+                        if parts["cpucooler"][0].type=='Liquid Cooler':
+                            conditions.append(Q(aio_support=True))
+                            if not is_socket_selected:
+                                conditions.append(Q(socket=parts["cpucooler"][0].compatibility))
+                if "internalharddrive" in parts:
+                    hard_types = [0,0]#sata,m2
+                    for hard in parts["internalharddrive"]:
+                        if hard.type=="SSD M.2":
+                            hard_types[1]+=1
+                        elif hard.type=="SSD NVMe":
+                            pcie_count+=1
+                        else:
+                            hard_types[0]+=1
+                    conditions.append(Q(sata_ports__gte=hard_types[0]))            
+                    conditions.append(Q(m2_slot__gte=hard_types[1]))
+                if "soundcard" in parts:
+                    pcie_count+=len(parts["soundcard"])
+                if "wiresnetworkcard" in parts:
+                    pcie_count+=len(parts["wiresnetworkcard"])
+                if "wirelessnetworkcard" in parts:
+                    pcie_count+=len(parts["wirelessnetworkcard"])
+                conditions.append(Q(pcie_slots__gte=pcie_count))  
+            elif part_class=="opticaldrive":
+                if "case" in parts:
+                    if len(parts["case"])>0:
+                        if parts["case"][0].socket5_25<1:
+                            return self.none()
+            elif part_class=="videocard":
+                if "case" in parts:
+                    if len(parts["case"])>0:
+                        conditions.append(Q(length__lte=parts["case"][0].gpu_clearance))
+                if "motherboard" in parts:
+                    if len(parts["motherboard"])>0:
+                        conditions.append(Q(compatible_motherboard=parts["motherboard"][0].socket))  
+            elif part_class=="powersupply":
+                if "case" in parts:
+                    if len(parts["case"])>0:
+                        if parts["case"][0].psu != 'Not Included':
+                            return self.none()
+                total_wattage = 0
+                for part_categroy in parts:
+                    for part in part_categroy:
+                        total_wattage+=part.power_requirement
+                total_wattage*=1.25
+                conditions.append(Q(wattage__gte=total_wattage))
+            return self.filter(*conditions)
+        except Exception as Ex:
+            print(f"Error: {Ex}")
+            return self.none()
 #----------------------------------------------------------------------------------------------------
 
 class Part(models.Model):
@@ -393,7 +587,7 @@ class Part(models.Model):
     content_type = models.ForeignKey(ContentType,null=True, on_delete=models.CASCADE, editable=False)
     date_created = models.DateField(auto_now=True)
     power_requirement = models.FloatField(default=0.0)
-    objects = InheritanceManager()
+    objects = PartManager()
 
     
     def __str__(self):
@@ -628,7 +822,7 @@ class Memory(Part):
     #general
 #    category = models.CharField(default="Memory",choices=(("Memory","Memory")), max_length=10)
     generation = models.CharField(default='DDR3',choices=ddr_versions, max_length=10)
-    speed = models.IntegerField(default=0)
+    speed = models.ForeignKey("Memory_Frequencies", on_delete=models.CASCADE)
     pricePerGB = models.DecimalField(max_digits=7, decimal_places=5)
     color = models.CharField(default="no color", max_length=50)
     features = models.TextField(default="")
@@ -683,7 +877,7 @@ class MotherBoard(Part):
     max_Memory = models.IntegerField(default=0)
     memory_Slots = models.SmallIntegerField(default=0)
     supported_ddr_version = models.CharField(default="DDR4" , choices=ddr_versions , max_length=10)
-    supported_memory_frequencies = models.CharField(default="", max_length=80)
+    supported_memory_frequencies = models.ManyToManyField("Memory_Frequencies")
     Extreme_Memory_Profile_support = models.BooleanField()
     memory_channels = models.CharField(default="Single Channel" , choices=memory_channels_list , max_length=50)
     max_capacity_per_slot = models.IntegerField(default=0)
