@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ShopBasket,order
+from .models import Cart,order
 from PcPart.models import Part
 
 
@@ -13,8 +13,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class Cart_Serializer(serializers.ModelSerializer):
     class Meta:
-        model=ShopBasket
-        fields=["id","order_date","total_cost","state"]
+        model=Cart
+        fields=["id","order_date","total_cost","statue"]
     
     
 class OrderSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class BasketSerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True, read_only=True)
 
     class Meta:
-        model = ShopBasket
-        fields = ["id","order_date","total_cost","state","orders"]
+        model = Cart
+        fields = ["id","order_date","total_cost","statue","orders"]
 
 

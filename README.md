@@ -440,7 +440,7 @@ null
 #### notes
 
     -in filter.part_type, categury name is:
-    'case','caseaccessory','casefan','cpu','cpucooler','motherboart','externalharddrive','internalharddrive','fancontroller','headphones','keyboard','memory','monitor','opticaldrive','mouse','powersupply','soundcard','speakers','thermalpaste','videocard','webcam','wiresnetworkcard','wirelessnetworkcard'
+    'case','caseaccessory','casefan','cpu','cpucooler','motherboard','externalharddrive','internalharddrive','fancontroller','headphones','keyboard','memory','monitor','opticaldrive','mouse','powersupply','soundcard','speakers','thermalpaste','videocard','webcam','wiresnetworkcard','wirelessnetworkcard'
 
 ## 14. Part Details
 

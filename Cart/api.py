@@ -8,25 +8,26 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from .models import order,ShopBasket,Discount
+from .models import order,Cart,Discount
 from .serializer import Cart_Serializer,BasketSerializer
 from datetime import date
 
 def compatibility_Case_MotherBoard(Case,MotherBoard):#danger if it Flase
-    return (MotherBoard.form_Factor in Case.form_factor_support)
+    return (MotherBoard[0].form_Factor in Case[0].form_factor_support.all())
 
 def compatibility_Case_CaseFan(Case,CaseFans):#Warning if it Flase
     fans_with_size={'120':0,'140':0}
     for fan in CaseFans:
-        fans_with_size[fan.size]+=1
-    return True if Case.fan_120mm_support >= fans_with_size['120'] and Case.fan_140mm_support >= fans_with_size['120'] else False
+        fans_with_size[str(fan.size)]+=1
+        if fan.size==140:
+            fans_with_size['120']+=1
+    return True if Case[0].fan_120mm_support >= fans_with_size['120'] and Case[0].fan_140mm_support >= fans_with_size['140'] else False
 
-def compatibility_Case_CPUCooler(Case,CPUCooler):#danger if it Flase
-    if CPUCooler.type == 'Liquid Cooler':
-
-        return True if Case.radiator_support == CPUCooler.size else False        
+def compatibility_Case_CPUCooler(Case,CpuCooler):#danger if it Flase
+    if CpuCooler[0].type == 'Liquid Cooler':
+        return True if Case[0].radiator_support == CpuCooler[0].size else False        
     
-    return True if Case.cpu_cooler_clearance == CPUCooler.size else False
+    return True if Case[0].cpu_cooler_clearance >= CpuCooler[0].cooler_height else False
 
 def compatibility_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it Flase
     IHD_with_size=[0,0]#3.5,2.5
@@ -35,41 +36,37 @@ def compatibility_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it 
             IHD_with_size[0]+=1
         else:
             IHD_with_size[1]+=1
-    return True if Case.socket3_5 >= IHD_with_size[0] and Case.socket2_5 >= IHD_with_size[1] else False
+    return True if Case[0].socket3_5 >= IHD_with_size[0] and Case[0].socket2_5 >= IHD_with_size[1] else False
 
 def compatibility_Case_OpticalDrive(Case,OpticalDrive):#Warning if it Flase
-    return True if Case.socket5_25 >= len(OpticalDrive) else False
+    return True if Case[0].socket5_25 >= len(OpticalDrive) else False
 
 def compatibility_Case_PowerSupply(Case,PowerSupply):#Danger if it Flase
-    if Case.psu =="Not Included":#Not Included
-        for formID in Case.form_factor_support:
-            if Form_Factor.objects.get(pk=formID).name in power_supply_and_cases[PowerSupply.type]:
-                return True
+    if Case[0].psu =="Not Included":#Not Included
+        if Case[0].type in power_supply_and_cases[PowerSupply[0].type]:
+            return True
     return False
 
 def compatibility_Case_VideoCard(Case,VideoCard):#Danger if it Flase
-    return True if VideoCard.length <= Case.gpu_clearance else False
+    for gpu in VideoCard:
+        if gpu.length > Case[0].gpu_clearance:
+            return False 
+    return True
 
 def compatibility_CaseFan(CaseFans,MotherBoard,FanController):#Warning if it Flase
     if FanController:
-        return True if CaseFans.__len__()<=FanController.channels else False
-    return True if CaseFans.__len__()<=MotherBoard.fan_headers else False
+        return True if CaseFans.__len__()<=FanController[0].channels else False
+    return True if CaseFans.__len__()<=MotherBoard[0].fan_headers else False
 
 def compatibility_MotherBoard_CPU(MotherBoard,CPU):#Danger if it Flase
-    return True if MotherBoard.socket==CPU.socket else False
+    return True if MotherBoard[0].socket==CPU[0].socket else False
 
-def get_motherboard_ddr_ver(str):
-    if str in ["DDR","LPDDR"] : return 1
-    elif str in ["DDR2","LPDDR2"] : return 2
-    elif str in ["DDR3","DDR3L","LPDDR3"] : return 3
-    elif str in ["DDR4","DDR4L","LPDDR4","LPDDR4X"] : return 4
-    else: return 5
 
 def compatibility_MotherBoard_Memory(MotherBoard,Memorys):#Danger if it Flase
-    if MotherBoard.memory_Slots>=Memorys.__len__():
+    if MotherBoard[0].memory_Slots>=Memorys.__len__():
         full_capacity = 0
-        Max_Capacity = Memorys[1].total_capacity
-        DDRVer = Memorys[1].generation
+        Max_Capacity = Memorys[0].total_capacity
+        DDRVer = Memorys[0].generation
         is_all_same_ddrVer = True
         unique_memorys={}
         for unit in Memorys:
@@ -78,34 +75,33 @@ def compatibility_MotherBoard_Memory(MotherBoard,Memorys):#Danger if it Flase
                 Max_Capacity=unit.total_capacity
             if unit.generation!=DDRVer:
                 is_all_same_ddrVer=False
-            if unit.id not in unique_memorys.keys:
+            if unit.id not in unique_memorys.keys():
                 unique_memorys[unit.id]=1
             else:
                 unique_memorys[unit.id]+=1
-        
         if is_all_same_ddrVer:
-            if MotherBoard.memory_Slots>=Memorys.__len__():
-                if get_motherboard_ddr_ver(MotherBoard.supported_ddr_version)==DDRVer:
-                    if Max_Capacity<MotherBoard.max_capacity_per_slot:
-                        if full_capacity<MotherBoard.max_Memory:
-                            UM_num=unique_memorys.keys.__len__()
-                            if (MotherBoard.memory_channels=="Single Channel") or (MotherBoard.memory_channels=="Dual Channel" and UM_num<=MotherBoard.memory_Slots/2) or (MotherBoard.memory_channels=="Quad Channel" and UM_num<=MotherBoard.memory_Slots/4):
+            if MotherBoard[0].memory_Slots>=Memorys.__len__():
+                if MotherBoard[0].supported_ddr_version==DDRVer:
+                    if Max_Capacity<=MotherBoard[0].max_capacity_per_slot:
+                        if full_capacity<=MotherBoard[0].max_Memory:
+                            UM_num=len(unique_memorys.keys())
+                            if (MotherBoard[0].memory_channels=="Single Channel") or (MotherBoard[0].memory_channels=="Dual Channel" and UM_num<=MotherBoard[0].memory_Slots/2) or (MotherBoard[0].memory_channels=="Quad Channel" and UM_num<=MotherBoard[0].memory_Slots/4):
                                 return True
         return False
         
-def compatibility_MotherBoard_CPUCooler(MotherBoard,CPUCooler):#Danger if it Flase
-    if CPUCooler.type == "Liquid Cooler":
-        return MotherBoard.aio_support
+def compatibility_MotherBoard_CPUCooler(MotherBoard,CpuCooler):#Danger if it Flase
+    if CpuCooler[0].type == "Liquid Cooler":
+        return MotherBoard[0].aio_support
     return True
 
 def compatibility_MotherBoard_InternalHardDrives(MotherBoard,InternalHardDrives):#Warning if it Flase
     hard_count=[0,0]#sata/m2
     for hardDrive in InternalHardDrives:
         if hardDrive.type=="SSD M.2":
-            hard_count[2]+=1
-        elif hardDrive.type!="SSD NVMe":
             hard_count[1]+=1
-    return True if MotherBoard.m2_slut>=hard_count[2] and MotherBoard.sata_ports>=hard_count[1] else False
+        elif hardDrive.type!="SSD NVMe":
+            hard_count[0]+=1
+    return True if MotherBoard[0].m2_slot>=hard_count[1] and MotherBoard[0].sata_ports>=hard_count[0] else False
 
 def compatibility_MotherBoard_Extension_Cards(MotherBoard,SoundCard,VideoCard,WiresNetworkCard,WirelessNetworkCard,InternalHardDrive):#Warning if it false
         NVMe_hards = []
@@ -113,14 +109,10 @@ def compatibility_MotherBoard_Extension_Cards(MotherBoard,SoundCard,VideoCard,Wi
             if hard.type == "SSD NVMe":
                 NVMe_hards.append(hard)
         EC_counters = len(VideoCard)+len(SoundCard)+len(WiresNetworkCard)+len(WirelessNetworkCard)+len(NVMe_hards)
-        return True if MotherBoard.pcie_slots>=EC_counters else False
-    
-def compatibility_CPU_Cooling(CPU):#Warning if it false
-        return not(CPU.cooling_included)
+        return True if MotherBoard[0].pcie_slots>=EC_counters else False
     
 def compatibility_CPU_Memory(CPU,Memorys):#Danger if it false
-        return CPU.max_memory_support>=Memorys.__len__()
-
+        return CPU[0].max_memory_support>=Memorys.__len__()
 
 def check_discount(part):
     outputs = [False,0]
@@ -158,8 +150,8 @@ def is_collection_valid(request):
         'CaseAccessory':[],
         'CaseFan':[],
         'Cpu':[],
-        'CPUCooler':[],
-        'MotherBoart':[],
+        'CpuCooler':[],
+        'MotherBoard':[],
         'ExternalHardDrive':[],
         'InternalHardDrive':[],
         'FanController':[],
@@ -184,7 +176,9 @@ def is_collection_valid(request):
             # data = json.load(request.body)
             print(data)
             for partID,num in data:
+                print(partID)
                 unit = Part.objects.select_subclasses().get(pk=partID)
+                print(unit)
                 unit_type=type(unit).__name__
                 
                 while num>0:
@@ -196,8 +190,8 @@ def is_collection_valid(request):
                 return JsonResponse({'status':'Failed','compatibility':'Undefined','message':'Exception has been detecated'})
         for keys in ['Case',
                     'Cpu',
-                    'CPUCooler',
-                    'MotherBoart',
+                    'CpuCooler',
+                    'MotherBoard',
                     'PowerSupply']:
             if len(part_sorter[keys])!= 1:
                 return JsonResponse({'status':'Failed','compatibility':'Undefined','message':f'this cart is not represent a PC collection because there is {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick just one of {keys} kategory'})
@@ -208,9 +202,9 @@ def is_collection_valid(request):
                     ]:
 
             if len(part_sorter[keys]) < 1:
-                return JsonResponse({'status':'Failed','compatibility':'Undefined','message':f'this cart is not represent a PC collection because there is NO {len(part_sorter[keys])} {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
+                return JsonResponse({'status':'Failed','compatibility':'Undefined','message':f'this cart is not represent a PC collection because there is NO {keys}s in it,if you want to build a PC then pick at least one of {keys} kategory'})
 
-        if not compatibility_MotherBoard_CPU(part_sorter['MotherBoard'],part_sorter['CPU']):
+        if not compatibility_MotherBoard_CPU(part_sorter['MotherBoard'],part_sorter['Cpu']):
             return JsonResponse({'status':'Success','compatibility':'Danger','message':'the MotherBoard and CPU isnot compitable'})
 
         if not compatibility_MotherBoard_Memory(part_sorter['MotherBoard'],part_sorter['Memory']):
@@ -222,16 +216,16 @@ def is_collection_valid(request):
         if not compatibility_Case_PowerSupply(part_sorter['Case'],part_sorter['PowerSupply']):
             return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case cannot contain PowerSupply or it has already one i it'})
 
-        if not compatibility_MotherBoard_CPUCooler(part_sorter['MotherBoard'],part_sorter['CPUCooler']):
+        if not compatibility_MotherBoard_CPUCooler(part_sorter['MotherBoard'],part_sorter['CpuCooler']):
             return JsonResponse({'status':'Success','compatibility':'Danger','message':'the MotherBoard is not supported Lequid Cooler'})
 
         if not compatibility_Case_VideoCard(part_sorter['Case'],part_sorter['VideoCard']):
             return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case maybe cannot contain GPU Card'})
 
-        if not compatibility_Case_CPUCooler(part_sorter['Case'],part_sorter['CPUCooler']):
+        if not compatibility_Case_CPUCooler(part_sorter['Case'],part_sorter['CpuCooler']):
             return JsonResponse({'status':'Success','compatibility':'Danger','message':'the Case maybe cannot contain CPU Cooler'})
             
-        if not compatibility_MotherBoard_Extension_Cards(part_sorter['MotherBoard'],part_sorter['SoundCard'],part_sorter['VideoCard'],part_sorter['WiresNetworkCard'],part_sorter['WirelessNetworkCard']):
+        if not compatibility_MotherBoard_Extension_Cards(part_sorter['MotherBoard'],part_sorter['SoundCard'],part_sorter['VideoCard'],part_sorter['WiresNetworkCard'],part_sorter['WirelessNetworkCard'],part_sorter['InternalHardDrive']):
             return JsonResponse({'status':'Success','compatibility':'Warning','message':'the MotherBoard don`t have enough or suitable sluts to import all Extintial Cards'})
             
         if not compatibility_MotherBoard_InternalHardDrives(part_sorter['MotherBoard'],part_sorter['InternalHardDrive']):
@@ -249,11 +243,8 @@ def is_collection_valid(request):
         if not compatibility_CaseFan(part_sorter['CaseFan'],part_sorter['MotherBoard'],part_sorter['FanController']):
             return JsonResponse({'status':'Success','compatibility':'Warning','message':'there is no enough channels to connect all Fans'})
 
-        if not compatibility_CPU_Memory(part_sorter['CPU'],part_sorter['Memory']):
+        if not compatibility_CPU_Memory(part_sorter['Cpu'],part_sorter['Memory']):
             return JsonResponse({'status':'Success','compatibility':'Warning','message':'The CPU cannot deal with all this memory'})
-
-        if not compatibility_CPU_Cooling(part_sorter['CPU']):
-            return JsonResponse({'status':'Success','compatibility':'Warning','message':'The CPU has already cooler with it'})
 
 
         return JsonResponse({'status':'Success','compatibility':'Success','message':'The part that you had selected must be fit togather'})
@@ -290,10 +281,10 @@ def Order_Cart(request):
         
 
 
-    cart = ShopBasket.objects.create(
+    cart = Cart.objects.create(
     client = request.user,
     total_cost = 0,
-    state = "Waiting") 
+    statue = "Waiting") 
     i = 0
     for part in parts:
         part[0].save()
@@ -313,7 +304,7 @@ class Cart_list(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]                                   
     def get_queryset(self):
-        return ShopBasket.objects.filter(client=self.request.user).order_by('-order_date')
+        return Cart.objects.filter(client=self.request.user).order_by('-order_date')
 
 
 
@@ -323,7 +314,7 @@ class Cart_Details(generics.RetrieveDestroyAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]                                   
     def get_queryset(self):
-        return ShopBasket.objects.filter(client=self.request.user)
+        return Cart.objects.filter(client=self.request.user)
 
 
 @api_view(['POST'])
@@ -332,13 +323,13 @@ class Cart_Details(generics.RetrieveDestroyAPIView):
 @permission_classes([IsAuthenticated])
 def Cancel_Cart(request,id):
     try:
-        cart = ShopBasket.objects.filter(client=request.user).get(pk=id)
-        if cart.state in ["Done","Canceled","Rejected"]:
-            return Response(status=HTTP_400_BAD_REQUEST,data={'message':f" can not cancle cart with state {cart.state} , it must be ether \" waiting \" or \" Ready \" to cancel"})
-        cart.state="Canceled"
+        cart = Cart.objects.filter(client=request.user).get(pk=id)
+        if cart.statue in ["Done","Canceled","Rejected"]:
+            return Response(status=HTTP_400_BAD_REQUEST,data={'message':f" can not cancle cart with state {cart.statue} , it must be ether \" waiting \" or \" Ready \" to cancel"})
+        cart.statue="Canceled"
         cart.save()
         return Response(status=HTTP_200_OK,data={'message':"wanted cart canceled Successfully!"})
-    except ShopBasket.NotFoundErr as Ex:
+    except Cart.NotFoundErr as Ex:
         return Response(status=HTTP_404_NOT_FOUND,data={'message':"you do not have any Cart like this!"})
     
         

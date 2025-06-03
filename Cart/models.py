@@ -13,14 +13,14 @@ state_list = (
 
 
 
-class ShopBasket(models.Model):
+class Cart(models.Model):
     
     id = models.AutoField(primary_key=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now=True)
     total_cost = models.FloatField(default=0.0)
-    state = models.CharField(default="Waiting",choices=state_list,max_length=10) 
-    
+    statue = models.CharField(default="Waiting",choices=state_list,max_length=10) 
+    team_message = models.TextField(null=True,blank=True,default=None)
 
     def __str__(self):
         return f"bascet {self.id}"
@@ -28,7 +28,7 @@ class ShopBasket(models.Model):
 
 class order(models.Model):
     
-    basket = models.ForeignKey("ShopBasket",related_name='orders', on_delete=models.CASCADE)
+    basket = models.ForeignKey("Cart",related_name='orders', on_delete=models.CASCADE)
     product = models.ForeignKey("PcPart.Part", on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     price = models.FloatField(default=0.0)
