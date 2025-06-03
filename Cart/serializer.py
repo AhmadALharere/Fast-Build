@@ -7,7 +7,7 @@ from PcPart.models import Part
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=Part
-        fields=["Gid","name","price","image_filename"]
+        fields=["id","name","price","image_filename"]
     
 
 

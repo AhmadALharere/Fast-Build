@@ -9,4 +9,5 @@ urlpatterns = [
     path('order/',api.Order_Cart,name="Order Cart"),
     path('My-Orders/',api.Cart_list.as_view(),name="Order List"),
     path('My-Orders/<int:pk>',api.Cart_Details.as_view(),name="Order Detail"),
+    path('My-Orders/cancel/<int:id>',api.Cancel_Cart,name="Cancel Cart"),
 ]

@@ -376,83 +376,81 @@ class PC_Chooser():
             
 # motherboard > case > cpu > gpu > ram > hard > cpufan > casefan > power supply
   
-def get_filtered_queryset(chooser,ordered_part):
-    limit = {'piece':1}
-    print(f"free budget: {chooser.free_budget} , section budget: {chooser.part_budget[ordered_part]} , total: {chooser.part_budget[ordered_part]+chooser.free_budget}")
-    price_filter = Q(price__lte=chooser.part_budget[ordered_part]+chooser.free_budget)
-    if ordered_part=='motherboard':
-        return MotherBoard.objects.filter(price_filter).order_by('-population'),limit
-    elif ordered_part=='case':
-        return Case.objects.filter(price_filter & Q(form_factor_support=chooser.PC.part_sorter['motherboard'][0].form_Factor)).order_by('-population'),limit
-    elif ordered_part=='cpu':
-        return Cpu.objects.filter(price_filter & Q(socket=chooser.PC.part_sorter['motherboard'][0].socket)).order_by('-population'),limit
-    elif ordered_part=='videocard':
-        limit['piece'] = chooser.PC.part_sorter['motherboard'][0].pcie_slots
-        motherboard_con = Q(compatible_motherboard = chooser.PC.part_sorter['motherboard'][0].socket)
-        case_con = Q(length__lte=chooser.PC.part_sorter['case'][0].gpu_clearance)
-        return VideoCard.objects.filter(price_filter & motherboard_con & case_con).order_by('-population'),limit
+def get_part_limit(chooser,ordered_part):
+    limit = {'piece':[len(chooser.PC.part_sorter[ordered_part]),1]}
+    if ordered_part=='videocard':
+        limit['piece'] = [len(chooser.PC.part_sorter[ordered_part]),chooser.PC.part_sorter['motherboard'][0].pcie_slots]
     elif ordered_part=='memory':
-        limit['piece'] = chooser.PC.part_sorter['motherboard'][0].memory_Slots
-        cpu_con = Q(total_capacity__lte = chooser.PC.part_sorter['cpu'][0].max_memory_support)
-        motherboard_con_1 = Q(generation = chooser.PC.part_sorter['motherboard'][0].supported_ddr_version)
-        motherboard_con_2 = Q(total_capacity__lte = chooser.PC.part_sorter['motherboard'][0].max_capacity_per_slot)
-        motherboard_con_3 = Q(total_capacity__lte = chooser.PC.part_sorter['motherboard'][0].max_Memory)
-        return Memory.objects.filter(price_filter & cpu_con & motherboard_con_1 & motherboard_con_2 & motherboard_con_3).order_by('-population'),limit
+        limit['piece'] = [len(chooser.PC.part_sorter[ordered_part]),chooser.PC.part_sorter['motherboard'][0].memory_Slots]
     elif ordered_part=='internalharddrive':
-        if chooser.PC.part_sorter['motherboard'][0].m2_slot:
-            limit = {'SATA':chooser.PC.part_sorter['motherboard'][0].sata_ports,'MVMe':chooser.PC.part_sorter['motherboard'][0].pcie_slots - len(chooser.PC.part_sorter['videocard']),'m.2':chooser.PC.part_sorter['motherboard'][0].m2_slot}
-            return InternalHardDrive.objects.filter(price_filter).order_by('-population'),limit
-        else:
-            no_m2_con = ~Q(type ='SSD M.2')
-            return InternalHardDrive.objects.filter(price_filter & no_m2_con).order_by('-population'),limit
-    
-    elif ordered_part=='cpucooler':
-        motherboard_con = Q(compatibility = chooser.PC.part_sorter['motherboard'][0].socket)
-        case_con_1 = Q(size = chooser.PC.part_sorter['case'][0].radiator_support)
-        case_con_2 = Q(cooler_height__lte = chooser.PC.part_sorter['case'][0].cpu_cooler_clearance)
-        liquid_con = Q(type='Liquid Cooler')
-        if chooser.PC.part_sorter['motherboard'][0].aio_support:
-            return CpuCooler.objects.filter(price_filter & ((case_con_2 & case_con_1 & motherboard_con & liquid_con) | (case_con_2 &  motherboard_con & ~liquid_con))).order_by('-population'),limit
-        else:
-            return CpuCooler.objects.filter(price_filter & case_con_2 & motherboard_con & ~liquid_con).order_by('-population'),limit 
-    
-    elif ordered_part=='casefan':
-        limit={'fan_120mm':chooser.PC.part_sorter['case'][0].fan_120mm_support,'fan_140mm':chooser.PC.part_sorter['case'][0].fan_140mm_support}
-        if chooser.PC.part_sorter['case'][0].fan_120mm_support:
-            if chooser.PC.part_sorter['case'][0].fan_140mm_support:
-                return CaseFan.objects.filter(price_filter).order_by('-population'),limit
+        counter = {'SATA':0,'NVMe':0,'m.2':0}
+        for hard in chooser.PC.part_sorter[ordered_part]:
+            if hard.type in ["SSD M.2","SSD U.2"]:
+                counter['m.2']+=1
+            elif hard.type=="SSD NVMe":
+                counter['NVMe']+=1
             else:
-                fan_140mm_con = Q(size=140)
-                return CaseFan.objects.filter(price_filter & ~fan_140mm_con).order_by('-population'),limit
-        else:
-            return None,limit
+                counter['SATA']+=1
+        limit = {'SATA':[counter['SATA'],chooser.PC.part_sorter['motherboard'][0].sata_ports],'NVMe':[counter['NVMe']+len(chooser.PC.part_sorter['videocard']),chooser.PC.part_sorter['motherboard'][0].pcie_slots ],'m.2':[counter['m.2'],chooser.PC.part_sorter['motherboard'][0].m2_slot]}
+    elif ordered_part=='casefan':
+        counter = {'120':0,'140':0}
+        for fan in chooser.PC.part_sorter[ordered_part]:
+            counter[str(fan.size)]+=1
+            if fan.size==140:
+                counter["120"]+=1
+        limit={'fan_120mm':[counter['120'],chooser.PC.part_sorter['case'][0].fan_120mm_support],'fan_140mm':[counter['140'],chooser.PC.part_sorter['case'][0].fan_140mm_support]}
+    elif ordered_part=='powersupply':
+        if chooser.PC.part_sorter['case'][0].psu !='Not Included':
+            limit['piece'] = [len(chooser.PC.part_sorter[ordered_part]),0]
+    return limit
+  
+  
+  
+def get_filtered_queryset(chooser,ordered_part):
+    limit = get_part_limit(chooser,ordered_part)
+    additional_conditions = []
+    for key in limit.keys():
+        if  limit[key][1] <= limit[key][0]:    
+            if ordered_part=='internalharddrive':
+                if key=="SATA":
+                    additional_conditions.append(~Q(type__in= ["HDD SATA","HDD SAS","SSD SATA","SSD SAS"]))
+                elif key=="NVMe":
+                    additional_conditions.append(~Q(type="SSD NVMe"))
+                else:
+                    additional_conditions.append(~Q(type__in=["SSD M.2","SSD U.2"]))    
+            elif ordered_part =="casefan":
+                if key=="fan_120mm":
+                    return CaseFan.objects.none(),limit
+                elif key=="NVMe":
+                    additional_conditions.append(~Q(size=140))
+            else:    
+                return Part.objects.none(),limit
+    
+    free_current_budget = chooser.part_budget[ordered_part]+chooser.free_budget
+    
+    print(f"free budget: {chooser.free_budget} , section budget: {chooser.part_budget[ordered_part]} , total: {chooser.part_budget[ordered_part]+chooser.free_budget}")
+    if ordered_part=='motherboard':
+        return MotherBoard.objects.get_compatible(free_current_budget,chooser.PC.part_sorter),limit
+    elif ordered_part=='case':
+        return Case.objects.get_compatible(free_current_budget,chooser.PC.part_sorter).order_by('-population'),limit
+    elif ordered_part=='cpu':
+        return Cpu.objects.get_compatible(free_current_budget,chooser.PC.part_sorter).order_by('-population'),limit
+    elif ordered_part=='videocard':
+        return VideoCard.objects.get_compatible(free_current_budget,chooser.PC.part_sorter).order_by('-population'),limit
+    elif ordered_part=='memory':
+        return Memory.objects.get_compatible(free_current_budget,chooser.PC.part_sorter).order_by('-population'),limit
+    elif ordered_part=='internalharddrive':
+        return InternalHardDrive.objects.get_compatible(free_current_budget,chooser.PC.part_sorter,additional_conditions).order_by('-population'),limit
+    elif ordered_part=='cpucooler':
+        return CpuCooler.objects.get_compatible(free_current_budget,chooser.PC.part_sorter).order_by('-population'),limit 
+    elif ordered_part=='casefan':
+        return CaseFan.objects.get_compatible(free_current_budget,chooser.PC.part_sorter,additional_conditions).order_by('-population'),limit
     else:
-        if chooser.PC.part_sorter['case'][0].psu =='Not Included':
-            limit['piece'] = 0
-            return [],limit
-        total_power = 0    
-        
-        for parts in chooser.PC.part_sorter.values():
-            for part in parts:
-                total_power += part.power_requirement
-        filterlist = []
-        filterlist.append(Q(wattage__gte=total_power*1.25))
-        filterlist.append(price_filter)
-        if len(chooser.PC.part_sorter['videocard'])>1:
-             filterlist.append(Q(multi_gpu_support=True))
         if chooser.pc_class in ['Gaming','Video Editing']:
-           filterlist.append(Q(efficiency__in=["Gold","Platinum","Titanium"]))
-        elif chooser. pc_class=='Developer':
-            filterlist.append(Q(efficiency__in=["Bronze","Gold","Platinum","Titanium"]))
-        psutype = 'SFX'
-        
-        if chooser.PC.part_sorter['case'][0].type in power_supply_and_cases['ATX']:
-            psutype = 'ATX'
-                
-        filterlist.append(Q(type = psutype)) 
-        combined_filter = reduce(and_,filterlist)
-        
-        return PowerSupply.objects.filter(combined_filter).order_by('-population') ,limit
+           additional_conditions.append(Q(efficiency__in=["Gold","Platinum","Titanium"]))
+        elif chooser.pc_class=='Developer':
+            additional_conditions.append(Q(efficiency__in=["Bronze","Gold","Platinum","Titanium"]))
+        return PowerSupply.objects.get_compatible(free_current_budget,chooser.PC.part_sorter,additional_conditions).order_by('-population') ,limit
          
 
 

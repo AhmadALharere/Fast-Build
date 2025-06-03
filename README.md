@@ -377,7 +377,32 @@ null
 
     
 
-## 12. Part List
+## 12. Cancel Cart
+
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/Cart/My-Orders/cancel/<cart_id>`                                   |
+| **Method**         | `POST`                                                               |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | null                                                                 |
+| **Description**    | `cancel cart order`                                                  | 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                                                               |
+|---------------------|--------------------------------------------------------------------------------------------------------------------|
+| **200 OK**          | `{"message": "wanted cart canceled Successfully!"}`                                                                |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                                                                     |
+| **404 Not Found**   | `{"message": "you do not have any Cart like this!"}`                                                               |
+| **400 Bad Request** | `{"message": " can not cancle cart with state Canceled , it must be ether \" waiting \" or \" Ready \" to cancel"}`|
+
+
+
+
+## 13. Part List
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -417,7 +442,7 @@ null
     -in filter.part_type, categury name is:
     'case','caseaccessory','casefan','cpu','cpucooler','motherboart','externalharddrive','internalharddrive','fancontroller','headphones','keyboard','memory','monitor','opticaldrive','mouse','powersupply','soundcard','speakers','thermalpaste','videocard','webcam','wiresnetworkcard','wirelessnetworkcard'
 
-## 13. Part Details
+## 14. Part Details
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -439,7 +464,7 @@ null
 
 
 
-## 14. Liked Part List
+## 15. Liked Part List
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -478,7 +503,7 @@ null
 
 
 
-## 15. put like
+## 16. put like
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -510,7 +535,7 @@ null
 
     -400 response reffered to that the user already had like on this part
 
-## 16. remove like
+## 17. remove like
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -532,7 +557,7 @@ null
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
 
-## 17. load Notifications
+## 18. load Notifications
 
 | Property           | Value                                                                                                |
 |--------------------|------------------------------------------------------------------------------------------------------|
@@ -564,7 +589,7 @@ null
             },...
         ]
 
-## 18. mark Notifications as readed
+## 19. mark Notifications as readed
 
 | Property           | Value                            |
 |--------------------|----------------------------------|
@@ -587,7 +612,7 @@ null
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
 
-## 19. Build PC
+## 20. Build PC
 
 | Property           | Value                                                                     |
 |--------------------|---------------------------------------------------------------------------|
@@ -623,7 +648,7 @@ null
     -in request body:
         -budget: integer number represent user budget in dollar ($)
         -pc_type: take values: Gaming , Developer , Video Editing , Office
-        -ordered_part: take values (prefer to pe in sort): motherboard , case , cpu , videocard , memory , internalharddrive , cpufan , casefan , powersupply
+        -ordered_part: take values (prefer to be in sort): motherboard , case , cpu , videocard , memory , internalharddrive , cpufan , casefan , powersupply
         - partList: is a list of  selected part id 
 
 
@@ -652,3 +677,5 @@ null
     | cpuciiler              | {'piece':1}                                          |
     | casefan                | {'fan_120mm':<integer>,'fan_140mm':<integer>}        |
     | powersupply            | {'piece':<0-1>}                                      |
+
+

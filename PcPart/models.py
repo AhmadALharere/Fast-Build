@@ -388,22 +388,23 @@ class Memory_Frequencies(models.Model):
 #----------------------------------------------------------------------------------------------------
 
 class PartManager(InheritanceManager):
-    def get_compatible(self,price=None,parts = None):
+    def get_compatible(self,price=None,parts = None,additional_conditions = None):
         if not price and not parts:
             return self.all()
+        
         conditions = []
         conditions.append(Q(price__lte=price))
+        if additional_conditions:
+            conditions.extend(additional_conditions)
         part_class = self.model.__name__.lower()
         if not parts or not isinstance(parts,dict):
             return self.filter(*conditions)
         try:
             if part_class=="case":
-                if "case" in parts:
-                    if len(parts['case'])>0:
-                        return self.none()
                 if "motherboard" in parts:
-                    conditions.append(Q(form_factor_support = parts["motherboard"][0].form_Factor))
-                if "casefan" in parts:
+                    if len(parts['motherboard'])>0:
+                        conditions.append(Q(form_factor_support = parts["motherboard"][0].form_Factor))
+                if "casefan" in parts:  
                     fans_with_size={'120':0,'140':0}
                     for fan in parts["casefan"]:
                         fans_with_size[str(fan.size)]+=1
@@ -412,10 +413,11 @@ class PartManager(InheritanceManager):
                     conditions.append(Q(fan_120mm_support__gte=fans_with_size["120"]))
                     conditions.append(Q(fan_140mm_support__gte=fans_with_size["140"]))
                 if "cpucooler" in parts:
-                    if parts["cpucooler"][0].type == 'Liquid Cooler':
-                        conditions.append(Q(radiator_support = parts["cpucooler"][0].size))
-                    else:
-                        conditions.append(Q(cpu_cooler_clearance__gte=parts["cpucooler"][0].size))
+                    if len(parts['cpucooler'])>0:
+                        if parts["cpucooler"][0].type == 'Liquid Cooler':
+                            conditions.append(Q(radiator_support = parts["cpucooler"][0].size))
+                        else:
+                            conditions.append(Q(cpu_cooler_clearance__gte=parts["cpucooler"][0].size))
                 if "internalharddrive" in parts:
                     IHD_with_size=[0,0]#3.5,2.5
                     for hard_drive in parts["internalharddrive"]:
@@ -426,9 +428,11 @@ class PartManager(InheritanceManager):
                     conditions.append(Q(socket3_5__gte=IHD_with_size[0]))
                     conditions.append(Q(socket2_5__gte=IHD_with_size[1]))
                 if "opticaldrive" in parts:
-                    conditions.append(Q(socket5_25__gte=len(parts["opticaldrive"])))
+                    if len(parts['opticaldrive'])>0:
+                        conditions.append(Q(socket5_25__gte=len(parts["opticaldrive"])))
                 if "powersupply" in parts:
-                    if len(parts["powersupply"])!=0:
+                    if len(parts["powersupply"])>0:
+                        conditions.append(Q(psu="Not Included"))
                         conditions.append(Q(type__in=case_types[parts["powersupply"][0].type]))
                 if "videocard" in parts:
                     max_length_video_card = 0
@@ -443,16 +447,19 @@ class PartManager(InheritanceManager):
                             conditions.append(~Q(size=140))
             elif part_class=="cpucooler":
                 if "case" in parts:
-                    case_con_1 = Q(size = parts['case'][0].radiator_support)
-                    case_con_2 = Q(cooler_height__lte = parts['case'][0].cpu_cooler_clearance)
-                    liquid_con = Q(type='Liquid Cooler')
-                    conditions.append(Q((case_con_1 & liquid_con) | (case_con_2 & ~liquid_con)))
+                    if len(parts["case"])>0:    
+                        case_con_1 = Q(size__in = parts['case'][0].radiator_support.all())
+                        case_con_2 = Q(cooler_height__lte = parts['case'][0].cpu_cooler_clearance)
+                        liquid_con = Q(type='Liquid Cooler')
+                        conditions.append(Q((case_con_1 & liquid_con) | (case_con_2 & ~liquid_con)))
                 if "motherboard" in parts:
-                    conditions.append(Q(compatibility=parts["motherboard"][0].socket))
-                    if not parts["motherboard"][0].aio_support:
-                        conditions.append(~Q(type='Liquid Cooler'))
+                    if len(parts["motherboard"])>0:
+                        conditions.append(Q(compatibility=parts["motherboard"][0].socket))
+                        if not parts["motherboard"][0].aio_support:
+                            conditions.append(~Q(type='Liquid Cooler'))
                 elif "cpu" in parts:
-                    conditions.append(Q(compatibility=parts["cpu"][0].socket))
+                    if len(parts["cpu"])>0:
+                        conditions.append(Q(compatibility=parts["cpu"][0].socket))
             elif part_class=="cpu":
                 if "motherboard" in parts:
                     if len(parts["motherboard"])>0:
@@ -460,7 +467,7 @@ class PartManager(InheritanceManager):
             elif part_class=="internalharddrive":
                 if 'motherboard' in parts:
                     if len(parts["motherboard"])>0:
-                        if parts["motherboard"][0].m2_slot > 0:
+                        if parts["motherboard"][0].m2_slot <= 0:
                             conditions.append(~Q(type ='SSD M.2'))
             elif part_class=="memory":
                 if "motherboard" in parts:
@@ -470,10 +477,34 @@ class PartManager(InheritanceManager):
                 if "cpu" in parts:
                     if len(parts["cpu"])>0:
                         conditions.append(Q(total_capacity__lte=parts["cpu"][0].max_memory_support))
+                if "memory" in parts:
+                    if len(parts["memory"])>0:
+                        if "motherboard" in parts:
+                            limit_unic = 4 if parts["motherboard"][0].memory_channels=="Quad Channel" else 2 if parts["motherboard"][0].memory_channels=="Dual Channel" else 1  
+                            limit_num = parts["motherboard"][0].memory_Slots
+                            if len(parts["memory"])>=limit_num:
+                                return self.none()
+                            if limit_unic!=1:    
+                                if len(parts["motherboard"])>0:        
+                                    memory_sorter = {}
+                                    limit_unic = 4 if parts["motherboard"][0].memory_channels=="Quad Channel" else 2 if parts["motherboard"][0].memory_channels=="Dual Channel" else 1  
+                                    limit_num = parts["motherboard"][0].memory_Slots
+                                    for ram in parts["memory"]:
+                                        if not str(ram.id) in memory_sorter:
+                                            memory_sorter[str(ram.id)]=1
+                                        else:
+                                            memory_sorter[str(ram.id)]+=1
+                                    if len(parts["memory"]) > limit_num/limit_unic or len(memory_sorter)>=limit_num/limit_unic:
+                                        valid_ids = []
+                                        for key in memory_sorter.keys():
+                                            if memory_sorter[key]%2!=0:
+                                                valid_ids.append(int(key))
+                                        conditions.append(Q(id__in=valid_ids))
+                                
             elif part_class=="motherboard":
                 pcie_count = 0
                 if "case" in parts:
-                    if parts["case"]>0:
+                    if len(parts["case"])>0:
                         conditions.append(Q(form_Factor__in=parts["case"][0].form_factor_support.all()))
                 is_socket_selected = False
                 if "cpu" in parts:
@@ -529,7 +560,7 @@ class PartManager(InheritanceManager):
                 if "internalharddrive" in parts:
                     hard_types = [0,0]#sata,m2
                     for hard in parts["internalharddrive"]:
-                        if hard.type=="SSD M.2":
+                        if hard.type in ["SSD M.2","SSD U.2"]:
                             hard_types[1]+=1
                         elif hard.type=="SSD NVMe":
                             pcie_count+=1
@@ -562,11 +593,23 @@ class PartManager(InheritanceManager):
                         if parts["case"][0].psu != 'Not Included':
                             return self.none()
                 total_wattage = 0
-                for part_categroy in parts:
+                for part_categroy in parts.values():
                     for part in part_categroy:
                         total_wattage+=part.power_requirement
+                print(total_wattage)
                 total_wattage*=1.25
                 conditions.append(Q(wattage__gte=total_wattage))
+                if 'videocard' in parts:
+                    if len(parts['videocard'])>1:
+                        conditions.append(Q(multi_gpu_support=True))
+                if 'case' in parts:
+                    if len(parts["case"])>0:
+                        psutype = 'SFX'
+                        if parts['case'][0].type in power_supply_and_cases['ATX']:
+                            psutype = 'ATX'
+                    conditions.append(Q(type = psutype))
+                 
+        
             return self.filter(*conditions)
         except Exception as Ex:
             print(f"Error: {Ex}")

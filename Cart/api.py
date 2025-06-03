@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from PcPart.models import Part,power_supply_and_cases,Form_Factor
-import json
+from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST,HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
@@ -107,57 +107,13 @@ def compatibility_MotherBoard_InternalHardDrives(MotherBoard,InternalHardDrives)
             hard_count[1]+=1
     return True if MotherBoard.m2_slut>=hard_count[2] and MotherBoard.sata_ports>=hard_count[1] else False
 
-def compatibility_MotherBoard_Extension_Cards(MotherBoard,SoundCard,VideoCard,WiresNetworkCard,WirelessNetworkCard):#Warning if it false
-        EC_counters = [0,0,0,0,0]
-        for card in SoundCard:
-            if card.interface == "PCIe x1":
-                EC_counters[1]+=1
-            elif card.interface == "PCIe x2":
-                EC_counters[2]+=1
-            elif card.interface == "PCIe x4":
-                EC_counters[3]+=1
-            elif card.interface == "PCIe x8":
-                EC_counters[4]+=1
-            else:
-                EC_counters[5]+=1
-            
-        for card in VideoCard:
-            if card.interface == "PCIe x1":
-                EC_counters[1]+=1
-            elif card.interface == "PCIe x2":
-                EC_counters[2]+=1
-            elif card.interface == "PCIe x4":
-                EC_counters[3]+=1
-            elif card.interface == "PCIe x8":
-                EC_counters[4]+=1
-            else:
-                EC_counters[5]+=1
-            
-        for card in WiresNetworkCard:
-            if card.interface == "PCIe x1":
-                EC_counters[1]+=1
-            elif card.interface == "PCIe x2":
-                EC_counters[2]+=1
-            elif card.interface == "PCIe x4":
-                EC_counters[3]+=1
-            elif card.interface == "PCIe x8":
-                EC_counters[4]+=1
-            else:
-                EC_counters[5]+=1
-        
-        for card in WirelessNetworkCard:
-            if card.interface == "PCIe x1":
-                EC_counters[1]+=1
-            elif card.interface == "PCIe x2":
-                EC_counters[2]+=1
-            elif card.interface == "PCIe x4":
-                EC_counters[3]+=1
-            elif card.interface == "PCIe x8":
-                EC_counters[4]+=1
-            else:
-                EC_counters[5]+=1
-            
-        return True if MotherBoard.pcie_x1_slots<=EC_counters[1] and MotherBoard.pcie_x2_slots<=EC_counters[2] and MotherBoard.pcie_x4_slots<=EC_counters[3] and MotherBoard.pcie_x8_slots<=EC_counters[4] and MotherBoard.pcie_x16_slots<=EC_counters[5] else False
+def compatibility_MotherBoard_Extension_Cards(MotherBoard,SoundCard,VideoCard,WiresNetworkCard,WirelessNetworkCard,InternalHardDrive):#Warning if it false
+        NVMe_hards = []
+        for hard in InternalHardDrive:
+            if hard.type == "SSD NVMe":
+                NVMe_hards.append(hard)
+        EC_counters = len(VideoCard)+len(SoundCard)+len(WiresNetworkCard)+len(WirelessNetworkCard)+len(NVMe_hards)
+        return True if MotherBoard.pcie_slots>=EC_counters else False
     
 def compatibility_CPU_Cooling(CPU):#Warning if it false
         return not(CPU.cooling_included)
@@ -368,3 +324,21 @@ class Cart_Details(generics.RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticated]                                   
     def get_queryset(self):
         return ShopBasket.objects.filter(client=self.request.user)
+
+
+@api_view(['POST'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def Cancel_Cart(request,id):
+    try:
+        cart = ShopBasket.objects.filter(client=request.user).get(pk=id)
+        if cart.state in ["Done","Canceled","Rejected"]:
+            return Response(status=HTTP_400_BAD_REQUEST,data={'message':f" can not cancle cart with state {cart.state} , it must be ether \" waiting \" or \" Ready \" to cancel"})
+        cart.state="Canceled"
+        cart.save()
+        return Response(status=HTTP_200_OK,data={'message':"wanted cart canceled Successfully!"})
+    except ShopBasket.NotFoundErr as Ex:
+        return Response(status=HTTP_404_NOT_FOUND,data={'message':"you do not have any Cart like this!"})
+    
+        
