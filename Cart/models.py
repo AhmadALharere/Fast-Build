@@ -23,7 +23,7 @@ class Cart(models.Model):
     team_message = models.TextField(null=True,blank=True,default=None)
 
     def __str__(self):
-        return f"bascet {self.id}"
+        return f"Cart {self.id}"
 
 
 class order(models.Model):

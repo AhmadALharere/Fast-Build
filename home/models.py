@@ -51,15 +51,15 @@ def _notify_cart_status_change(sender, instance, created, **kwargs):
             )
             
 @receiver(post_save,sender=User)
-def _notify_user_wellcome(sender,instance,created,**kwargs):
+def _notify_user_welcome(sender,instance,created,**kwargs):
     if created:
         Notification.objects.create(user=instance
-                                    ,title="Wellcome Message!!"
+                                    ,title="Welcome Message!!"
                                     ,message="thank you for registering in our app, we wish for you to have a good time with us!!"
                                     ,is_read=False)
         
 @receiver(post_save,sender=Part)
-def _notify_cart_posted(sender,instance,created,**kwargs):
+def _notify_part_posted(sender,instance,created,**kwargs):
     if created:
         Notification.objects.create(
             user=None,
@@ -69,7 +69,7 @@ def _notify_cart_posted(sender,instance,created,**kwargs):
         )
 
 @receiver(post_save,sender=Discount)
-def _notify_cart_posted(sender,instance,created,**kwargs):
+def _notify_discount_posted(sender,instance,created,**kwargs):
     if created:
         Notification.objects.create(
             user=None,
@@ -91,7 +91,7 @@ class Like (models.Model):
         unique_together = ('user','part') # مشان يمنع الاعجاب اكثر من مرة
         
     def __str__(self):
-        return f"{self.user.username} أعجب بـ {self.Part.name}" #يقوم بارجاع نص وصفي  
+        return f"{self.user.username} put like on {self.Part.name}" #يقوم بارجاع نص وصفي  
 
 
     

@@ -29,14 +29,13 @@ def compatibility_Case_CPUCooler(Case,CpuCooler):#danger if it Flase
     
     return True if Case[0].cpu_cooler_clearance >= CpuCooler[0].cooler_height else False
 
-def compatibility_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it Flase
-    IHD_with_size=[0,0]#3.5,2.5
+def compatibility_Case_InternalHardDrive(Case,InternalHardDrive):#Warning if it False
+    counter = 0
     for hard_drive in InternalHardDrive:
-        if hard_drive.type == "HDD SATA" or hard_drive.type == "HDD SAS":
-            IHD_with_size[0]+=1
-        else:
-            IHD_with_size[1]+=1
-    return True if Case[0].socket3_5 >= IHD_with_size[0] and Case[0].socket2_5 >= IHD_with_size[1] else False
+        if hard_drive.type != "SSD M.2" and hard_drive.type != "SSD U.2" and hard_drive.type != "SSD NVMe":
+            counter+=1
+    total_limit = Case[0].socket3_5 + Case[0].socket2_5
+    return True if counter <= total_limit else False
 
 def compatibility_Case_OpticalDrive(Case,OpticalDrive):#Warning if it Flase
     return True if Case[0].socket5_25 >= len(OpticalDrive) else False
