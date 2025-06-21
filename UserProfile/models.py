@@ -13,11 +13,10 @@ def imgprofileSave(instance,filename):
 class profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     birth_date = models.DateField(auto_now=False, auto_now_add=False)
-    total_paied = models.IntegerField(default=0)
+    total_paid = models.IntegerField(default=0)
     phone_number = models.CharField(default='',max_length=15)
     gender = models.CharField(default="Male",choices={("Male","Male"),("Female","Female")}, max_length=10)
     image = models.ImageField(upload_to=imgprofileSave,null=True,blank=True)
-    username_editing = models.SmallIntegerField(default=1)
     
     def __str__(self):
         return self.user.username

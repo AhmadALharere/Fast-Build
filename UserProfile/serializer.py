@@ -22,7 +22,7 @@ class User_Serializer(serializers.ModelSerializer):
   
     class Meta:
         model = User
-        fields = ['username','first_name','last_name','email']
+        fields = ['first_name','last_name','email']
         
 
 
@@ -47,9 +47,6 @@ class Profile_Serializer(serializers.ModelSerializer):
             user = instance.user
             user.first_name = user_data.get('first_name', user.first_name)
             user.last_name = user_data.get('last_name', user.last_name)
-            if instance.username_editing > 0:
-                user.username = user_data.get('username', user.username)
-                instance.username_editing = instance.username_editing -1
             user.save()
 
         # تعديل حقول البروفايل
