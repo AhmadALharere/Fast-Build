@@ -2,7 +2,7 @@
 
 API Docs:
 
-## Base URL:https://ahmadalharere.pythonanywhere.com/
+## Base URL:https://ahmadalharere.pythonanywhere.com/api
 ## Authentication:
 **Type**:Token Authentication
 **Header**(for authenticated endpoints): Authorization: Token <your_token_here>
@@ -73,7 +73,7 @@ null
 #### Request Body
 
 ```json
-{"username": "newuser","email": "newuser@example.com","password1": "aeamlgng","password2": "aeamlgng",  "birth_date":"2003-09-15",
+{"username": "newuser","email": "newuser@example.com","password1": "aeamlgng","password2": "aeamlgng",  "birth_date":"15/9/2003",
   "gender":"Male",
 "phone_number":"0959413015"}
 ```
@@ -84,11 +84,11 @@ null
 | **204 No Content**  |                                                                           |
 | **400 Bad Request** | `{"username": ["A user with that username already exists."]}`             |
 | **400 Bad Request** | `{"email": ["Email is already in use."]}`                                 |
-| **400 Bad Request** | `{"non_Failed_errors": ["The two password Faileds didn't match."]}`         |
-| **400 Bad Request** | `{"username": ["This Failed is required."]}`                               |
-| **400 Bad Request** | `{"email": ["This Failed is required."]}`                                  |
-| **400 Bad Request** | `{"password1": ["This Failed is required."]}`                              |
-| **400 Bad Request** | `{"password2": ["This Failed is required."]}`                              |
+| **400 Bad Request** | `{"non_Failed_errors": ["The two password Faileds didn't match."]}`       |
+| **400 Bad Request** | `{"username": ["This Failed is required."]}`                              |
+| **400 Bad Request** | `{"email": ["This Failed is required."]}`                                 |
+| **400 Bad Request** | `{"password1": ["This Failed is required."]}`                             |
+| **400 Bad Request** | `{"password2": ["This Failed is required."]}`                             |
 
 
 ### 4. Change Password

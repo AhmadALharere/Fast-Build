@@ -8,7 +8,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 
 class CustomRegisterSerializer(RegisterSerializer):
     
-    birth_date = serializers.DateField(required=True)
+    birth_date = serializers.DateField(required=True,input_formats=['%d/%m/%Y'])
     gender = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=True)
 
