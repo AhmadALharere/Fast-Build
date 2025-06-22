@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from allauth.socialaccount.models import SocialAccount
 
 #app name: UserProfile
 # Create your models here.
@@ -25,10 +26,10 @@ class profile(models.Model):
     
 
     
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=SocialAccount)
 def _post_save_receiver(sender,instance,created, **kwargs):
     if created:
-        profile.objects.create(user=instance,birth_date="2000-01-01",total_paied=0,phone_number=0,gender="Male",username_editing=1)
+        profile.objects.create(user=instance.user,birth_date="2000-01-01",total_paid=0,phone_number="",gender="Male")
  
 
 

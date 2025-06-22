@@ -19,7 +19,7 @@ class Cart(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now=True)
     total_cost = models.FloatField(default=0.0)
-    statue = models.CharField(default="Waiting",choices=state_list,max_length=10) 
+    status = models.CharField(default="Waiting",choices=state_list,max_length=10) 
     team_message = models.TextField(null=True,blank=True,default=None)
 
     def __str__(self):

@@ -3,12 +3,12 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from PcPart.filters import PartFilter
 from PcPart.models import Part
-from .serializers import PartSerializer,PartDetailsSerializer,like_Serializer,liked_Part_Serializer,Notification_serializer
+from .serializers import PartSerializer,PartDetailsSerializer,like_Serializer,liked_Part_Serializer,Notification_serializer,Discount_serializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import Notification,Like
+from .models import Notification,Like,Discount
 from django.db.models import Q
 from django.db import transaction
 from rest_framework.exceptions import NotFound,PermissionDenied
@@ -118,4 +118,12 @@ def mark_read_notification(request, id):
     notification.is_read = True
     notification.save()
 
-    return Response({'status': 'Success'})    
+    return Response({'status': 'Success'})  
+
+
+class Get_Discount(generics.ListAPIView):
+    queryset = Discount.objects.filter(is_valid=True).order_by('-end_date')
+    serializer_class = Discount_serializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from PcPart.models import Part
 from PcPart.serializer import CaseSerializer,CaseAccessorySerializer,CaseFanSerializer,CpuCoolerSerializer,CpuSerializer,VideoCardSerializer,MouseSerializer,ExternalHardDriveSerializer,FanControllerSerializer,headphonesSerializer,InternalHardDriveSerializer,KeyboardSerializer,MemorySerializer,MonitorSerializer,MotherBoardSerializer,OpticalDriveSerializer,PowerSupplySerializer,SoundCardSerializer,SpeakersSerializer,WiresNetworkCardSerializer,WirelessNetworkCardSerializer,WebcamSerializer,ThermalPasteSerializer
-from .models import Notification,Like
+from .models import Notification,Like,Discount
 
 
 class PartSerializer(serializers.ModelSerializer):
@@ -100,3 +100,8 @@ class Notification_serializer(serializers.ModelSerializer):
         
     def get_type(self,obj):
         return "Private" if obj.user!=None else "Public"
+    
+class Discount_serializer(serializers.ModelSerializer):
+    class Meta:
+        model=Discount
+        fields="__all__"

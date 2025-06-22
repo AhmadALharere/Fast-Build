@@ -283,7 +283,7 @@ def Order_Cart(request):
     cart = Cart.objects.create(
     client = request.user,
     total_cost = 0,
-    statue = "Waiting") 
+    status = "Waiting") 
     i = 0
     for part in parts:
         part[0].save()
@@ -323,9 +323,9 @@ class Cart_Details(generics.RetrieveDestroyAPIView):
 def Cancel_Cart(request,id):
     try:
         cart = Cart.objects.filter(client=request.user).get(pk=id)
-        if cart.statue in ["Done","Canceled","Rejected"]:
-            return Response(status=HTTP_400_BAD_REQUEST,data={'message':f" can not cancle cart with state {cart.statue} , it must be ether \" waiting \" or \" Ready \" to cancel"})
-        cart.statue="Canceled"
+        if cart.status in ["Done","Canceled","Rejected"]:
+            return Response(status=HTTP_400_BAD_REQUEST,data={'message':f" can not cancle cart with state {cart.status} , it must be ether \" waiting \" or \" Ready \" to cancel"})
+        cart.status="Canceled"
         cart.save()
         return Response(status=HTTP_200_OK,data={'message':"wanted cart canceled Successfully!"})
     except Cart.NotFoundErr as Ex:

@@ -8,12 +8,29 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 
 class CustomRegisterSerializer(RegisterSerializer):
     
+    birth_date = serializers.DateField(required=True)
+    gender = serializers.CharField(required=True)
+    phone_number = serializers.CharField(required=True)
+
+    
     def validate_email(self, value):
         print("validate_email called!")
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Email is already in use.")
         return value
 
+    def save(self, request):
+        user = super().save(request)
+        
+        profile.objects.create(
+            user=user,
+            birth_date=self.validated_data['birth_date'],
+            gender=self.validated_data['gender'],
+            phone_number=self.validated_data['phone_number'],
+            total_paid = 0
+        )
+        
+        return user
 
 
 
@@ -28,7 +45,7 @@ class User_Serializer(serializers.ModelSerializer):
 
 class Profile_Serializer(serializers.ModelSerializer):
     
-    username = serializers.CharField(source='user.username', required=False)
+    username = serializers.CharField(source='user.username', required=False, read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
 
     # بيانات من User (قابلة للتعديل)

@@ -1,7 +1,8 @@
 "# Fast-Build" 
 
 API Docs:
-## Base URL:http://localhost:8000/api
+
+## Base URL:https://ahmadalharere.pythonanywhere.com/
 ## Authentication:
 **Type**:Token Authentication
 **Header**(for authenticated endpoints): Authorization: Token <your_token_here>
@@ -72,7 +73,9 @@ null
 #### Request Body
 
 ```json
-{"username": "newuser","email": "newuser@example.com","password1": "aeamlgng","password2": "aeamlgng"}
+{"username": "newuser","email": "newuser@example.com","password1": "aeamlgng","password2": "aeamlgng",  "birth_date":"2003-09-15",
+  "gender":"Male",
+"phone_number":"0959413015"}
 ```
 #### Responses
 
@@ -463,8 +466,40 @@ null
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
 
 
+## 15. Discount List
 
-## 15. Liked Part List
+| Property           | Value                                                                |
+|--------------------|----------------------------------------------------------------------|
+| **URL**            | `/home/Discount/`                                                    |
+| **Method**         | `GET`                                                                |
+| **Authentication** | Required                                                             |
+| **Content-Type**   | null                                                                 |
+| **Description**    | `get Discount List`                                                  | 
+
+#### Request Body
+
+
+#### Responses
+
+| HTTP Status         | Body                                                                    |
+|---------------------|-------------------------------------------------------------------------|
+| **200 OK**          | `[<Object>,...]`                                                        |
+| **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
+
+
+### notes
+    -Discount object be like:
+        {
+        "id": <Discount_id:int>,
+        "start_date": "2025-06-03",
+        "end_date": "2025-06-13",
+        "is_valid": <true/false>,
+        "new_price": 60.0<Float>,
+        "part": 48 <Part_id>
+        }
+
+
+## 16. Liked Part List
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -503,7 +538,7 @@ null
 
 
 
-## 16. put like
+## 17. put like
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -535,7 +570,7 @@ null
 
     -400 response reffered to that the user already had like on this part
 
-## 17. remove like
+## 18. remove like
 
 | Property           | Value                                                                |
 |--------------------|----------------------------------------------------------------------|
@@ -557,7 +592,7 @@ null
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
 
-## 18. load Notifications
+## 19. load Notifications
 
 | Property           | Value                                                                                                |
 |--------------------|------------------------------------------------------------------------------------------------------|
@@ -589,7 +624,7 @@ null
             },...
         ]
 
-## 19. mark Notifications as readed
+## 20. mark Notifications as readed
 
 | Property           | Value                            |
 |--------------------|----------------------------------|
@@ -612,7 +647,7 @@ null
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                            |
 
 
-## 20. Auto Build PC
+## 21. Auto Build PC
 
 | Property           | Value                                                                     |
 |--------------------|---------------------------------------------------------------------------|
