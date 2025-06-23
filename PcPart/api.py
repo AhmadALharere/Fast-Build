@@ -24,9 +24,9 @@ def fix_data(request):
         #part.content_type = ContentType.objects.get_for_model(part)
         #print(f'{id} : {part.id} :: {part.content_type}')
         #part.save
-    str = "lrsg operg dgfr"
-    print(str.join(str.split()))
-        
+    str = "case fan"
+    print("".join(str.split()))
+    print("".join(str.split("_")))   
     return Response({"status":"True"})
     '''
         value = str(type(part)).lower()

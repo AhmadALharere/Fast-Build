@@ -17,7 +17,10 @@ class PartFilter(django_filters.FilterSet):
 
         try:
             # ابحث عن موديل بنفس الاسم (الاسم لازم يتطابق مع الـ model name بالانجليزي الصغير)
-            content_type = ContentType.objects.get(model=value.lower())
+            value = value.lower()
+            value = "".join(value.split('_'))
+            value = "".join(value.split())
+            content_type = ContentType.objects.get(model=value)
             return queryset.filter(content_type=content_type)
         except ContentType.DoesNotExist:
             return queryset.none()

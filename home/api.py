@@ -29,7 +29,7 @@ class PartListView(generics.ListAPIView):
     filterset_class = PartFilter
     pagination_class = part_paginator
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
-    search_fields = ['name']
+    search_fields = ['name','content_type__model']
     ordering_fields = ['liked','population','price','date_created']
 
 
