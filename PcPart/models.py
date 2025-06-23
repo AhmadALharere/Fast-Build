@@ -1096,7 +1096,7 @@ class Webcam(Part):
 class WiresNetworkCard(Part):
     
 #    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
-    interface = models.CharField(default="PCIe x1" , choices=Extention_Cards_interface ,max_length=20)
+    interface = models.CharField(default="PCIe x1" , max_length=20)
     color =  models.CharField(default="no color", max_length=50)
     features = models.TextField(default="")
     
@@ -1111,7 +1111,7 @@ class WirelessNetworkCard(Part):
     
 #    category = models.CharField(default="Case",choices=(("Case","Case")), max_length=10)
     protocol = models.CharField(default="",max_length=50)
-    interface = models.CharField(default="PCIe x1" , choices=Extention_Cards_interface ,max_length=20)
+    interface = models.CharField(default="PCIe x1" , max_length=20)
     color =  models.CharField(default="no color", max_length=50)
     features = models.TextField(default="")
     
