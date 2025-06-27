@@ -434,7 +434,6 @@ null
 | part_type | filter        | `<name of categury in small-laters>`                                                           |
 | min_price | filter        | `<float number>`                                                                               |
 | max_price | filter        | `<float number>`                                                                               |
-| page      | pagenator     | `<integer number>`                                                                             |
 | ordering  | order method  | ` liked , population , price , date_created , -liked , -population , -price , -date_created `  |
 | search    | search        | `<string>`                                                                                     |
 

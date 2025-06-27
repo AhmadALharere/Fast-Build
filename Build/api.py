@@ -503,7 +503,7 @@ def build_pc(request):
     if not chooser.auto_builder(part_in_sort[0],part_in_sort[1:]):
         return JsonResponse({'statues':'failed','query':[],'PC_class':"None",'total_cost':0,'collection validation':False,'compatibility_status':"Undefined",'message':"sorry but our storage did not contain a part with suitable price for your PC, try to increase your budget or try to build it manually"})
         
-    serializer_data = PartSerializer(chooser.PC.get_PC_as_list(),many = True)
+    serializer_data = PartSerializer(chooser.PC.get_PC_as_list(),many = True, context={'request': request})
     return JsonResponse({'statues':'success','query':serializer_data.data,'PC_class':chooser.pc_class,'total_cost':chooser.PC.total_cost,'collection validation':chooser.PC.is_collection_valid,'compatibility_status':chooser.PC.compatibility,'message':chooser.PC.message})
     
     
