@@ -442,6 +442,18 @@ null
 
 #### notes
 
+    -returned objects be like:
+    {{
+            "id": 15,
+            "name": "Corsair 4000D Airflow",
+            "price": 59.9,
+            "population": 2,
+            "like_count": 0,
+            "image_filename": "https://ahmadalharere.pythonanywhere.com/media/PcPart/case/imgicon/15.jpg"
+        },...}
+
+
+
     -in filter.part_type, categury name is:
     'case','caseaccessory','casefan','cpu','cpucooler','motherboard','externalharddrive','internalharddrive','fancontroller','headphones','keyboard','memory','monitor','opticaldrive','mouse','powersupply','soundcard','speakers','thermalpaste','videocard','webcam','wiresnetworkcard','wirelessnetworkcard'
 
@@ -464,6 +476,39 @@ null
 |---------------------|-------------------------------------------------------------------------|
 | **200 OK**          | `<wanted object>`                                                       |
 | **401 Unauthorized**| `{"detail": "Invalid token."}`                                          |
+
+#### notes
+
+    -returned objects be like:
+    {{
+    "id": 31,
+    "name": "DEEPCOOL GAMMAXX 400 V2 Blue LED",
+    "price": 20.66,
+    "population": 2,
+    "like_count": 0,
+    "power_requirement": 0,
+    "image_filename": "https://ahmadalharere.pythonanywhere.com/media/PcPart/cpu%20cooler/imgicon/31.jpg",
+    "details": {
+        "color": "Blue",
+        "size": 120,
+        "type": "Air Cooler",
+        "rpm": " 500 ~ 1650 ",
+        "noise_level": " 17.8 ~ 30.0 ",
+        "compatibility": [
+            10,
+            11,
+            16,
+            17,
+            18,
+            19,
+            20,
+            22
+        ],
+        "cooler_height": 155,
+        "features": "\"Good performance cooler with blue LED lighting, single tower design\""
+    }
+},...}
+
 
 
 ## 15. Discount List
